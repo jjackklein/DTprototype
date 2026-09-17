@@ -1,0 +1,2537 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Crossroads Health — Wearable Data Share</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+/* ============================ Tokens ============================ */
+:root{
+  --g50:#f9fafb; --g100:#f3f4f6; --g200:#e5e7eb; --g300:#d1d5db; --g400:#9ca3af;
+  --g500:#6b7280; --g600:#4b5563; --g700:#374151; --g900:#111827;
+  --t50:#f0fdfa; --t100:#ccfbf1; --t200:#99f6e4; --t500:#14b8a6; --t600:#0d9488;
+  --t700:#0f766e; --t800:#115e59; --t900:#134e4a;
+  --e50:#ecfdf5; --e100:#d1fae5; --e200:#a7f3d0; --e700:#047857; --e800:#065f46; --e900:#064e3b;
+  --a50:#fffbeb; --a200:#fde68a; --a600:#d97706; --a700:#b45309; --a800:#92400e; --a900:#78350f;
+  --r50:#fef2f2; --r200:#fecaca; --r700:#b91c1c; --r800:#991b1b;
+  --font:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:var(--font);-webkit-font-smoothing:antialiased;color:var(--g900);font-size:14px}
+#root{height:100%}
+button{font:inherit;color:inherit;margin:0}
+h1,h2,h3,p,dl,dd,dt,ol,ul,figure{margin:0}
+ul,ol{padding:0;list-style:none}
+table{border-collapse:collapse;width:100%}
+
+/* ============================ Layout ============================ */
+.app{display:flex;height:100%;width:100%;overflow:hidden;background:#fff}
+.main{display:flex;min-width:0;flex:1;flex-direction:column}
+
+.sidenav{display:flex;width:224px;flex:none;flex-direction:column;border-right:1px solid var(--g200);background:var(--g50)}
+.sidenav-brand{display:flex;align-items:center;gap:10px;padding:16px}
+.sidenav-brand b{font-size:14px;font-weight:600;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brandmark{display:flex;height:32px;width:32px;flex:none;align-items:center;justify-content:center;border-radius:8px;
+  font-size:12px;font-weight:700;color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.sidenav-list{min-height:0;flex:1;overflow-y:auto;padding:8px}
+.navitem{display:block;width:100%;border:0;background:none;border-radius:8px;padding:8px 12px;text-align:left;
+  font-size:14px;color:var(--g600);cursor:pointer}
+.navitem:hover{background:var(--g100);color:var(--g900)}
+.navitem.active{background:var(--t50);font-weight:500;color:var(--t800);box-shadow:inset 0 0 0 1px var(--t200)}
+
+.pagehead{display:flex;flex:none;align-items:flex-start;justify-content:space-between;gap:24px;
+  border-bottom:1px solid var(--g200);background:#fff;padding:20px 32px}
+.pagehead h1{font-size:20px;font-weight:600;letter-spacing:-.02em}
+.pagehead .sub{margin-top:4px;font-size:14px;color:var(--g500)}
+.pagehead-actions{display:flex;flex:none;align-items:center;gap:8px}
+
+.pagebody{min-height:0;flex:1;overflow-y:auto;background:var(--g50);padding:24px 32px}
+.pagebody.white{background:#fff}
+.pagebody>*+*{margin-top:20px}
+.pagebody.tight{padding:24px 28px}
+
+.panel{border:1px solid var(--g200);border-radius:12px;background:#fff}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:16px;
+  border-bottom:1px solid var(--g200);padding:14px 20px}
+.panel-head h3{font-size:14px;font-weight:600}
+.panel-head .sub{margin-top:2px;font-size:12px;color:var(--g500)}
+.panel-body{padding:20px}
+
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:1fr}
+.g3{grid-template-columns:1fr}
+.g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+.gmain{grid-template-columns:minmax(0,1fr)}
+.gap20{gap:20px}
+@media(min-width:768px){ .g3{grid-template-columns:repeat(3,minmax(0,1fr))} }
+@media(min-width:1024px){ .g2{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media(min-width:640px){ .g23{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media(min-width:1280px){
+  .g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .gmain{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
+  .gmain.wide{grid-template-columns:minmax(0,1fr) 300px}
+  .gmain.note{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+  .gmain.hub{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}
+  .g3x{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .span2{grid-column:span 2}
+}
+
+/* ============================ Cards / rows ============================ */
+.card{overflow:hidden;border:1px solid var(--g200);border-radius:12px;background:#fff}
+.row{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border-top:1px solid var(--g200)}
+.card>.row:first-child{border-top:0}
+.row.muted{background:var(--g50)}
+.row.sel{background:rgba(240,253,250,.7)}
+.row.bad{background:rgba(254,242,242,.6)}
+.row.click{cursor:pointer}
+.row.click:hover{background:var(--g50)}
+
+.tile{display:flex;height:36px;width:36px;flex:none;align-items:center;justify-content:center;border-radius:8px;
+  font-size:12px;font-weight:600;color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.tile.sm{height:32px;width:32px}
+.tile.muted{background:var(--g200)!important;background-image:none!important;color:var(--g400);box-shadow:none}
+
+.rowtext{min-width:0;flex:1}
+.rowtext b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:500;color:var(--g900)}
+.rowtext.muted b{color:var(--g400)}
+.rowtext span{display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--g500)}
+.chev{color:var(--g400);flex:none}
+.rowval{font-size:14px;font-weight:500;color:var(--g900);text-align:right}
+
+/* ============================ Buttons ============================ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;
+  border-radius:8px;font-weight:500;height:44px;padding:0 20px;font-size:14px;cursor:pointer;
+  border:1px solid var(--t700);background:var(--t700);color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.btn:hover{background:var(--t800);border-color:var(--t800)}
+.btn:focus-visible{outline:2px solid var(--t600);outline-offset:2px}
+.btn.sm{height:36px;padding:0 14px}
+.btn.full{width:100%}
+.btn.secondary{background:#fff;color:var(--g900);border-color:var(--g300);box-shadow:none}
+.btn.secondary:hover{background:var(--g50);border-color:var(--g300)}
+.btn.ghost{background:transparent;color:var(--g600);border-color:transparent;box-shadow:none}
+.btn.ghost:hover{background:var(--g100);color:var(--g900)}
+.btn.danger{background:var(--r700);border-color:var(--r700)}
+.btn.danger:hover{background:var(--r800);border-color:var(--r800)}
+.btn[disabled]{cursor:not-allowed;background:var(--g100);border-color:var(--g200);color:var(--g400);box-shadow:none}
+
+.tlink{border:0;background:none;padding:0;cursor:pointer;font-size:14px;font-weight:500;color:var(--t700);
+  text-decoration:underline;text-decoration-color:rgba(15,118,110,.3);text-underline-offset:4px}
+.tlink:hover{text-decoration-color:var(--t700)}
+.plainlink{border:0;background:none;padding:0;cursor:pointer;font-size:14px;color:var(--t700)}
+.plainlink:hover{text-decoration:underline}
+
+/* ============================ Controls ============================ */
+.toggle{position:relative;display:inline-flex;height:24px;width:44px;flex:none;align-items:center;
+  border:0;border-radius:999px;background:var(--g200);cursor:pointer;padding:0;transition:background .2s}
+.toggle.on{background:var(--t600)}
+.toggle[disabled]{cursor:not-allowed;opacity:.4}
+.toggle i{display:block;height:20px;width:20px;border-radius:999px;background:#fff;
+  box-shadow:0 1px 2px rgba(0,0,0,.06),0 0 0 1px rgba(17,24,39,.05);transform:translateX(2px);transition:transform .2s}
+.toggle.on i{transform:translateX(22px)}
+
+.cbx{display:flex;width:100%;align-items:flex-start;gap:12px;border:0;background:none;padding:0;
+  text-align:left;cursor:pointer;color:inherit}
+.cbx[disabled]{cursor:not-allowed;opacity:.5}
+.cbx .ind{display:flex;height:20px;width:20px;flex:none;align-items:center;justify-content:center;margin-top:2px;
+  border:1px solid var(--g300);border-radius:6px;background:#fff}
+.cbx.on .ind{border-color:var(--t600);background:var(--t600)}
+.cbx span{font-size:14px;line-height:1.4;color:var(--g700)}
+
+.radio{display:flex;height:20px;width:20px;flex:none;align-items:center;justify-content:center;
+  border:1px solid var(--g300);border-radius:999px;background:#fff;cursor:pointer;padding:0}
+.radio.on{border-color:var(--t600)}
+.radio i{display:block;height:10px;width:10px;border-radius:999px;background:var(--t600)}
+
+.inp{height:40px;width:100%;border:1px solid var(--g300);border-radius:8px;background:#fff;padding:0 12px;
+  font-family:inherit;font-size:14px;color:var(--g900)}
+.inp.sm{height:36px;width:256px}
+.ta{width:100%;border:1px solid var(--g300);border-radius:8px;background:#fff;padding:10px 12px;
+  font-family:inherit;font-size:14px;line-height:1.6;color:var(--g900);resize:vertical}
+.inp:focus,.ta:focus{outline:none;border-color:var(--t600);box-shadow:0 0 0 3px rgba(13,148,136,.2)}
+.inp::placeholder,.ta::placeholder{color:var(--g400)}
+.ta.summary{border-color:var(--e200);background:rgba(236,253,245,.6);
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
+.flabel{display:block;margin-bottom:6px;font-size:12px;font-weight:500;color:var(--g500)}
+.fhint{margin-top:6px;font-size:12px;color:var(--g400)}
+.fgroup+.fgroup{margin-top:16px}
+
+/* ============================ Chips / callouts ============================ */
+.chip{display:inline-flex;align-items:center;white-space:nowrap;border-radius:999px;padding:2px 10px;
+  font-size:12px;font-weight:500;background:var(--g100);color:var(--g600);box-shadow:inset 0 0 0 1px var(--g200)}
+.chip.teal{background:var(--t50);color:var(--t700);box-shadow:inset 0 0 0 1px var(--t200)}
+.chip.success{background:var(--e50);color:var(--e700);box-shadow:inset 0 0 0 1px var(--e200)}
+.chip.warn{background:var(--a50);color:var(--a700);box-shadow:inset 0 0 0 1px var(--a200)}
+.chip.danger{background:var(--r50);color:var(--r700);box-shadow:inset 0 0 0 1px var(--r200)}
+
+.callout{border:1px solid var(--g200);border-radius:12px;background:var(--g50);color:var(--g600);
+  padding:12px 16px;font-size:12px;line-height:1.7}
+.callout.teal{border-color:var(--t200);background:var(--t50);color:var(--t800)}
+.callout.success{border-color:var(--e200);background:var(--e50);color:var(--e800)}
+.callout.warn{border-color:var(--a200);background:var(--a50);color:var(--a800)}
+.callout b{font-weight:600}
+.callout button{color:inherit}
+
+.empty{border:1px dashed var(--g300);border-radius:12px;background:rgba(249,250,251,.6);
+  padding:24px 20px;text-align:center}
+.empty.tall{padding:48px 20px}
+.empty b{font-size:14px;font-weight:500;color:var(--g700)}
+.empty p{margin:4px auto 0;max-width:28rem;font-size:12px;line-height:1.7;color:var(--g500)}
+
+.seclabel{margin:0 0 8px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--g400)}
+.screentitle{margin-bottom:24px}
+.screentitle .step{margin-bottom:6px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--t700)}
+.screentitle h1{font-size:24px;font-weight:600;letter-spacing:-.02em}
+.screentitle p{margin-top:6px;font-size:14px;line-height:1.7;color:var(--g500)}
+
+.stat{border:1px solid var(--g200);border-radius:12px;background:#fff;padding:16px}
+.stat.attention{border-color:var(--a200);background:var(--a50)}
+.stat .lab{font-size:12px;color:var(--g500)}
+.stat .val{margin-top:4px;font-size:24px;font-weight:600;letter-spacing:-.02em}
+.stat.attention .val{color:var(--a800)}
+.stat .hint{margin-top:4px;font-size:12px;color:var(--g400)}
+
+/* ============================ Tables ============================ */
+.tablewrap{overflow:hidden;border:1px solid var(--g200);border-radius:12px;background:#fff}
+.tablewrap table{font-size:14px}
+.tablewrap th{border-bottom:1px solid var(--g200);background:var(--g50);padding:10px 20px;text-align:left;
+  font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--g400)}
+.tablewrap td{border-top:1px solid var(--g200);padding:12px 20px;color:var(--g700);vertical-align:middle}
+.tablewrap tbody tr:first-child td{border-top:0}
+.tablewrap tr.click{cursor:pointer}
+.tablewrap tr.click:hover{background:var(--g50)}
+.tablewrap tr.sel{background:rgba(240,253,250,.7)}
+.tablewrap tr.isnew{background:var(--e50)}
+.tablewrap.tight th,.tablewrap.tight td{padding:12px 16px}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;color:var(--g600)}
+.tcenter{padding:24px;text-align:center;color:var(--g400)}
+.cellflex{display:flex;align-items:center;gap:10px}
+
+.deflist>div{display:flex;gap:12px;font-size:14px}
+.deflist>div+div{margin-top:10px}
+.deflist dt{width:128px;flex:none;color:var(--g500)}
+.deflist.narrow dt{width:80px}
+.deflist.wide dt{width:112px}
+.deflist dd{min-width:0;flex:1;color:var(--g900)}
+
+/* ============================ Modal ============================ */
+.backdrop{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;
+  background:rgba(17,24,39,.5);padding:24px}
+.modal{display:flex;max-height:85vh;width:100%;max-width:32rem;flex-direction:column;overflow:hidden;
+  border-radius:16px;background:#fff;box-shadow:0 25px 50px -12px rgba(0,0,0,.25)}
+.modal.md{max-width:28rem}
+.modal-head{display:flex;flex:none;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--g200);padding:16px 20px}
+.modal-head h3{font-size:16px;font-weight:600;letter-spacing:-.01em}
+.modal-body{flex:1;overflow-y:auto;padding:20px}
+.modal-foot{margin-top:24px;display:flex;justify-content:flex-end;gap:8px}
+.iconbtn{border:0;background:none;border-radius:6px;padding:4px;color:var(--g400);cursor:pointer;line-height:0}
+.iconbtn:hover{background:var(--g100);color:var(--g900)}
+
+/* ============================ Account menu ============================ */
+.acct{position:relative;border-top:1px solid var(--g200);padding:8px}
+.acct-btn{display:flex;width:100%;align-items:center;gap:10px;border:0;background:none;border-radius:8px;
+  padding:8px;text-align:left;cursor:pointer}
+.acct-btn:hover{background:var(--g100)}
+.avatar{display:flex;flex:none;align-items:center;justify-content:center;border-radius:999px;
+  font-weight:600;color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.05);border:0;padding:0;cursor:pointer}
+.avatar.lg{height:32px;width:32px;font-size:12px}
+.avatar.sm{height:28px;width:28px;font-size:10px}
+.avatar.xl{height:40px;width:40px;font-size:14px}
+.avatar.ring{box-shadow:0 0 0 2px #fff}
+.acct-meta{min-width:0;flex:1;line-height:1.3}
+.acct-meta b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:500}
+.acct-meta span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--g500)}
+.acct-view{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 8px 2px;
+  font-size:12px;color:var(--g400)}
+
+.menu{position:absolute;z-index:50;width:256px;overflow:hidden;border:1px solid var(--g200);border-radius:12px;
+  background:#fff;box-shadow:0 20px 25px -5px rgba(0,0,0,.1),0 8px 10px -6px rgba(0,0,0,.1)}
+.menu.up{bottom:100%;left:0;margin-bottom:8px}
+.menu.down{top:100%;right:0;margin-top:8px}
+.menu .grouplab{padding:10px 12px 4px;font-size:12px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.06em;color:var(--g400)}
+.menu-item{display:flex;width:100%;align-items:center;gap:10px;border:0;background:none;padding:8px 12px;
+  text-align:left;cursor:pointer}
+.menu-item:hover{background:var(--g50)}
+.menu-item.active{background:var(--t50)}
+.menu-item .m{min-width:0;flex:1;line-height:1.3}
+.menu-item .m b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:400;color:var(--g900)}
+.menu-item.active .m b{font-weight:500;color:var(--t900)}
+.menu-item .m span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--g500)}
+.menu-item .tick{color:var(--t700);line-height:0}
+.menu-reset{width:100%;border:0;border-top:1px solid var(--g200);background:none;padding:8px 12px;margin-top:4px;
+  text-align:left;font-size:14px;color:var(--g500);cursor:pointer}
+.menu-reset:hover{background:var(--g50);color:var(--g900)}
+
+.devtoggle{display:flex;align-items:center;gap:2px;border:1px solid var(--g200);border-radius:8px;background:#fff;padding:2px}
+.devtoggle button{border:0;background:none;border-radius:6px;padding:4px;color:var(--g400);cursor:pointer;line-height:0}
+.devtoggle button:hover{background:var(--g100);color:var(--g700)}
+.devtoggle button.on{background:var(--g900);color:#fff}
+
+/* ============================ Phone ============================ */
+.phone-stage{height:100vh;overflow-y:auto;background:linear-gradient(to bottom,var(--g100),var(--g200))}
+.phone-wrap{display:flex;min-height:100%;align-items:center;justify-content:center;padding:32px}
+.phone{height:844px;width:390px;flex:none;border-radius:48px;background:var(--g900);padding:12px;
+  box-shadow:0 25px 50px -12px rgba(0,0,0,.25),0 0 0 1px rgba(17,24,39,.1)}
+.phone-screen{display:flex;height:100%;width:100%;flex-direction:column;overflow:hidden;border-radius:36px;background:#fff}
+.statusbar{position:relative;z-index:10;display:flex;height:48px;flex:none;align-items:center;
+  justify-content:space-between;background:#fff;padding:0 28px}
+.statusbar .time{font-size:14px;font-weight:600;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.statusbar .icons{display:flex;align-items:center;gap:6px;color:var(--g900)}
+.notch{position:absolute;left:50%;top:8px;height:28px;width:112px;transform:translateX(-50%);
+  border-radius:999px;background:var(--g900)}
+.phone-scroll{flex:1;overflow-y:auto;overscroll-behavior:contain}
+.homebar{display:flex;height:20px;flex:none;align-items:center;justify-content:center;background:#fff}
+.homebar i{display:block;height:4px;width:128px;border-radius:999px;background:rgba(17,24,39,.2)}
+.pscreen{display:flex;min-height:100%;flex-direction:column}
+.pbody{flex:1;padding:0 20px}
+.pbody.pb{padding-bottom:32px}
+.pfoot{padding:32px 20px}
+.pfoot .hint{margin-top:10px;text-align:center;font-size:12px;color:var(--g400)}
+.pfoot .btn+.btn{margin-top:10px}
+
+.appheader{padding:12px 20px 20px}
+.appheader .top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.appheader .org{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:12px;font-weight:500;color:var(--g400)}
+.appheader .right{display:flex;flex:none;align-items:center;gap:8px}
+.appheader .nav{margin-top:8px;display:flex;height:24px;align-items:center;justify-content:space-between}
+.avwrap{position:relative}
+.backbtn{display:flex;align-items:center;border:0;background:none;border-radius:4px;margin-left:-4px;
+  padding:0 4px;font-size:14px;color:var(--g500);cursor:pointer}
+.backbtn:hover{color:var(--g900)}
+.backbtn i{margin-right:2px;font-style:normal;font-size:16px;line-height:1}
+.stepnum{font-size:12px;color:var(--g400)}
+
+.notif{margin-bottom:24px;border:1px solid var(--g200);border-radius:12px;background:var(--g50);padding:12px 16px}
+.notif .meta{margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--g400)}
+.notif .meta b{font-weight:500;color:var(--g500)}
+.notif .title{font-size:14px;font-weight:500;color:var(--g900)}
+.notif .body{margin-top:2px;font-size:12px;color:var(--g500)}
+
+/* ============================ Screen bits ============================ */
+.successdot{display:flex;height:48px;width:48px;align-items:center;justify-content:center;margin-bottom:20px;
+  border-radius:999px;background:var(--e100);color:var(--e700)}
+.agreebox{margin-top:24px;border:1px solid var(--g200);border-radius:12px;background:var(--g50);padding:14px 16px}
+.banner{display:flex;flex:none;align-items:center;justify-content:space-between;gap:16px;
+  border-bottom:1px solid var(--g200);background:#fff;padding:16px 32px}
+.banner .who{display:flex;min-width:0;align-items:center;gap:12px}
+.banner .who b{display:block;font-size:16px;font-weight:600;letter-spacing:-.02em}
+.banner .who p{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--g500)}
+.consentbar{display:flex;flex:none;align-items:center;justify-content:space-between;gap:16px;
+  border-bottom:1px solid var(--t200);background:var(--t50);padding:10px 32px}
+.consentbar p{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--t800)}
+.consentbar button{flex:none;border:0;background:none;padding:0;cursor:pointer;font-size:12px;font-weight:500;
+  color:var(--t800);text-decoration:underline;text-underline-offset:4px}
+
+.flagbar{display:flex;align-items:center;justify-content:space-between;gap:20px;border:1px solid var(--a200);
+  border-radius:12px;background:var(--a50);padding:16px 20px}
+.flagbar b{font-size:14px;font-weight:600;color:var(--a900)}
+.flagbar p{margin-top:2px;font-size:12px;color:var(--a700)}
+.flagbar .acts{display:flex;flex:none;gap:8px}
+
+.metrictile{border:1px solid var(--g200);border-radius:12px;background:var(--g50);padding:16px}
+.metrictile.live{background:#fff;cursor:pointer}
+.metrictile.live:hover{border-color:var(--t500);box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1)}
+.metrictile .top{margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  font-size:12px;color:var(--g500)}
+.metrictile .big{font-size:24px;font-weight:600;letter-spacing:-.02em}
+.metrictile .big em{margin-left:4px;font-style:normal;font-size:16px;font-weight:500;color:var(--g400)}
+.metrictile .off{font-size:16px;font-weight:500;color:var(--g400)}
+.metrictile .sub{margin-top:4px;font-size:12px;color:var(--g500)}
+
+.sparkrow{display:flex;align-items:center;gap:20px}
+.sparkrow+.sparkrow{margin-top:12px}
+.sparkrow .lab{width:144px;flex:none;font-size:12px;color:var(--g500)}
+.sparkrow .sp{flex:1;min-width:0}
+.sparkrow svg{height:44px;width:100%;display:block}
+
+.box{border:1px solid var(--g200);border-radius:12px;background:#fff;padding:20px}
+.box h3{margin-bottom:12px;font-size:14px;font-weight:600}
+.box .note{margin-top:12px;font-size:12px;line-height:1.7;color:var(--g500)}
+.box+.box{margin-top:16px}
+.boxhead{margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.boxhead h3{margin:0}
+.boxhead .hint{font-size:12px;color:var(--g400)}
+
+.crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.crumbs .sep{font-size:14px;color:var(--g400)}
+.ranges{margin-left:auto;display:flex;gap:6px}
+.ranges button{border:1px solid var(--g300);border-radius:8px;background:#fff;padding:6px 12px;
+  font-size:12px;font-weight:500;color:var(--g600);cursor:pointer}
+.ranges button:hover{background:var(--g50)}
+.ranges button.on{border-color:var(--t600);background:var(--t600);color:#fff}
+.ranges button[disabled]{cursor:not-allowed;border-color:var(--g200);background:var(--g100);color:var(--g400)}
+
+.signstrip{display:flex;align-items:center;justify-content:space-between;gap:20px;border:1px solid var(--g200);
+  border-radius:12px;background:#fff;padding:16px 20px}
+.signstrip .draft{font-size:14px;color:var(--g500)}
+.signstrip .signed{font-size:14px;font-weight:500;color:var(--e700)}
+.signstrip .acts{display:flex;gap:8px}
+.audit{padding:0 4px;font-size:12px;color:var(--g400)}
+
+.stepbar{display:flex;flex-direction:column;gap:8px}
+@media(min-width:640px){.stepbar{flex-direction:row}}
+.stepbar li{flex:1}
+.stepbar button{display:flex;width:100%;align-items:center;gap:10px;border:1px solid var(--g200);
+  border-radius:12px;background:var(--g50);padding:12px 16px;text-align:left;font-size:14px;
+  color:var(--g400);cursor:default}
+.stepbar button.done{background:#fff;color:var(--g900);cursor:pointer}
+.stepbar button.done:hover{background:var(--g50)}
+.stepbar button.active{border-color:var(--t600);background:var(--t600);font-weight:500;color:#fff}
+.stepbar .n{display:flex;height:24px;width:24px;flex:none;align-items:center;justify-content:center;
+  border-radius:999px;background:var(--g200);font-size:12px;font-weight:600;color:var(--g500)}
+.stepbar button.done .n{background:var(--e100);color:var(--e700)}
+.stepbar button.active .n{background:rgba(255,255,255,.25);color:#fff}
+.stepbar .lab{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stepnav{display:flex;align-items:center;justify-content:space-between;gap:16px;
+  border-top:1px solid var(--g200);padding-top:20px}
+
+.dropzone{cursor:pointer;border:2px dashed var(--g300);border-radius:12px;background:var(--g50);
+  padding:32px 20px;text-align:center}
+.dropzone.tall{padding:40px 20px}
+.dropzone:hover{border-color:#2dd4bf;background:rgba(240,253,250,.4)}
+.dropzone.drag{border-color:var(--t500);background:var(--t50)}
+.dropzone .up{display:flex;height:40px;width:40px;align-items:center;justify-content:center;margin:0 auto 8px;
+  border-radius:999px;background:var(--t100);color:var(--t700)}
+.dropzone b{font-size:14px;font-weight:500;color:var(--g900)}
+.dropzone p{margin-top:2px;font-size:12px;color:var(--g500)}
+.progress{margin-top:8px;height:4px;width:100%;overflow:hidden;border-radius:999px;background:var(--g200)}
+.progress i{display:block;height:100%;border-radius:999px;background:var(--t600);transition:width .3s}
+.uprow{min-width:0;flex:1}
+.uprow b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:500}
+.uprow p{margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--g500)}
+
+.teamcard{border:1px solid var(--g200);border-radius:12px;background:var(--g50);padding:16px}
+.teamcard.ok{border-color:var(--e200);background:var(--e50)}
+.teamcard .top{margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.teamcard .top b{font-size:14px;font-weight:500}
+.teamcard .owner{font-size:12px;color:var(--g500)}
+.teamcard .acts{margin-top:12px;display:flex;gap:8px}
+.chiprow{display:flex;flex-wrap:wrap;gap:6px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px}
+.orderbox{border:1px solid var(--g200);border-radius:8px;background:#fff;padding:12px 14px}
+.orderbox.locked{background:var(--g50)}
+.orderbox+.orderbox{margin-top:10px}
+
+.works{margin-top:40px;border-top:1px solid var(--g200);padding-top:24px}
+.works .lab{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--g400)}
+.works .list{margin-top:12px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.works .item{display:flex;align-items:center;gap:8px;border:1px solid var(--g200);border-radius:8px;
+  background:#fff;padding:6px 12px;font-size:14px;color:var(--g700)}
+.works .item.off{background:var(--g50);color:var(--g400)}
+.works .item .m{display:flex;height:24px;width:24px;align-items:center;justify-content:center;
+  border-radius:6px;font-size:10px;font-weight:600;color:#fff}
+.works .item .m.off{background:var(--g300)}
+.works .soon{font-size:12px;color:var(--g400)}
+
+.hero{margin:0 auto;width:100%;max-width:56rem;padding:24px 0}
+.hero h1{margin-top:16px;font-size:30px;font-weight:600;letter-spacing:-.02em}
+.hero .lede{margin-top:12px;max-width:42rem;font-size:16px;line-height:1.7;color:var(--g500)}
+.hero .steps{margin-top:32px}
+.stepcard{border:1px solid var(--g200);border-radius:12px;background:#fff;padding:20px}
+.stepcard .n{display:flex;height:32px;width:32px;align-items:center;justify-content:center;border-radius:999px;
+  background:var(--t50);font-size:14px;font-weight:600;color:var(--t700);box-shadow:inset 0 0 0 1px var(--t200)}
+.stepcard h2{margin-top:14px;font-size:14px;font-weight:600}
+.stepcard p{margin-top:6px;font-size:14px;line-height:1.7;color:var(--g500)}
+.never{margin-top:32px;border:1px solid var(--g200);border-radius:12px;background:var(--g50);padding:20px}
+.never h2{font-size:14px;font-weight:600}
+.never ul{margin-top:10px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.7;color:var(--g600)}
+.herocta{margin-top:32px;display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+
+.patientview{height:100%;width:100%;overflow-y:auto;background:#fff;padding:40px 48px}
+.patientview .head{margin-bottom:32px;display:flex;align-items:flex-start;justify-content:space-between;gap:24px}
+.patientview h2{font-size:30px;font-weight:600;letter-spacing:-.02em}
+.patientview .range{margin-top:6px;font-size:16px;color:var(--g500)}
+.compare{margin-top:32px;display:flex;align-items:center;gap:40px;border-top:1px solid var(--g200);padding-top:24px}
+.compare .lab{font-size:14px;color:var(--g500)}
+.compare .val{margin-top:4px;font-size:24px;font-weight:600;letter-spacing:-.02em}
+.compare .val.after{color:var(--a700)}
+.compare .arrow{font-size:24px;color:var(--g300)}
+
+.translation>div{border-top:1px solid var(--g200);padding:10px 0}
+.translation>div:first-child{border-top:0;padding-top:0}
+.translation>div:last-child{padding-bottom:0}
+.translation dt{font-size:14px;font-weight:500;color:var(--g900)}
+.translation dd{margin-top:2px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:12px;color:var(--g500)}
+.translation .approved{margin-top:8px;border-top:0;border-radius:8px;background:var(--e50);padding:10px 12px}
+.translation .approved dt{color:var(--e900)}
+.translation .approved dd{color:var(--e700)}
+
+.searchhead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;
+  border-bottom:1px solid var(--g200);padding:16px 20px}
+.searchhead h3{font-size:14px;font-weight:600}
+
+/* ============================ Charts ============================ */
+.chartwrap{position:relative}
+.chartwrap svg{width:100%;display:block}
+.tip{pointer-events:none;position:absolute;top:0;display:none;flex-direction:column;align-items:center;
+  transform:translateX(-50%);border-radius:8px;background:var(--g900);padding:6px 10px;color:#fff;
+  box-shadow:0 10px 15px -3px rgba(0,0,0,.1);white-space:nowrap}
+.tip b{font-size:12px;font-weight:600}
+.tip span{font-size:10px;color:var(--g400)}
+.unitlab{position:absolute;right:4px;top:0;font-size:11px;color:var(--g400)}
+.axis{fill:var(--g400);font-size:11px}
+.markerlab{fill:var(--a600);font-size:11px;font-weight:600}
+
+/* ============================ Utilities ============================ */
+.mt2{margin-top:8px}.mt3{margin-top:12px}.mt4{margin-top:16px}.mt5{margin-top:20px}.mt6{margin-top:24px}
+.mb2{margin-bottom:8px}.mb4{margin-bottom:16px}.mb5{margin-bottom:20px}
+.muted-sm{font-size:12px;color:var(--g400)}
+.txt-sm{font-size:14px;line-height:1.7;color:var(--g500)}
+.txt-xs{font-size:12px;line-height:1.7;color:var(--g500)}
+.stack20>*+*{margin-top:20px}
+.stack16>*+*{margin-top:16px}
+.big-num{font-size:24px;font-weight:600;letter-spacing:-.02em}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+/* =====================================================================
+   Crossroads Health — Wearable Data Share prototype
+   Single file, no build step, no dependencies. Open index.html directly.
+
+   Sections:  1. Data   2. State   3. Render engine   4. UI vocabulary
+              5. Patient screens   6. Clinician screens   7. Admin screens
+              8. Router + events
+   ===================================================================== */
+(function () {
+'use strict';
+
+/* =====================================================================
+   1. DATA
+   ===================================================================== */
+
+// Deterministic seed so the same figures render on every load.
+function mulberry32(seed) {
+  return function () {
+    seed |= 0; seed = (seed + 0x6d2b79f5) | 0;
+    var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+var CONSENT_START = '2026-03-01';
+var CONSENT_END = '2026-04-30';
+var CHANGE_DATE = '2026-03-14';
+var GAP_DAYS = ['2026-03-22', '2026-04-05', '2026-04-06'];
+
+var SERIES = (function () {
+  var rand = mulberry32(20260301), out = [];
+  var cursor = new Date(CONSENT_START + 'T00:00:00Z');
+  var last = new Date(CONSENT_END + 'T00:00:00Z');
+  while (cursor <= last) {
+    var date = cursor.toISOString().slice(0, 10);
+    var after = date >= CHANGE_DATE;
+    var gap = GAP_DAYS.indexOf(date) >= 0;
+    out.push({
+      date: date,
+      steps: gap ? null : Math.round((after ? 2100 : 5200) + (rand() - 0.5) * (after ? 900 : 1900)),
+      hr: gap ? null : Math.round((after ? 72 : 70) + (rand() - 0.5) * 5),
+      sleep: gap ? null : Number(((after ? 7.1 : 7.3) + (rand() - 0.5) * 1.3).toFixed(1)),
+      skinTemp: gap ? null : Number((36.6 + (rand() - 0.5) * 0.7).toFixed(1))
+    });
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+  return out;
+})();
+
+var TOTAL_DAYS = SERIES.length;
+var COVERAGE_DAYS = SERIES.filter(function (d) { return d.steps !== null; }).length;
+
+function avg(key, filter) {
+  var v = SERIES.filter(function (d) { return d[key] !== null && filter(d); }).map(function (d) { return d[key]; });
+  return v.reduce(function (a, b) { return a + b; }, 0) / v.length;
+}
+var STEPS_BEFORE = Math.round(avg('steps', function (d) { return d.date < CHANGE_DATE; }) / 100) * 100;
+var STEPS_AFTER = Math.round(avg('steps', function (d) { return d.date >= CHANGE_DATE; }) / 100) * 100;
+var STEPS_DROP_PCT = Math.round((1 - STEPS_AFTER / STEPS_BEFORE) * 100);
+var RECENT_HR = 72, HR_30D_AVG = 70, RECENT_SLEEP = 7.2;
+
+var num = function (v) { return Math.round(v).toLocaleString(); };
+
+var METRICS = [
+  { id: 'hr', label: 'Resting heart rate', sub: 'Daily average', clinical: 'Resting HR', unit: 'bpm',
+    key: 'hr', format: function (v) { return String(Math.round(v)); }, suffix: 'bpm', gated: false },
+  { id: 'steps', label: 'Activity', sub: 'Daily steps', clinical: 'Steps', unit: 'steps/day',
+    key: 'steps', format: num, suffix: '', gated: false },
+  { id: 'sleep', label: 'Sleep', sub: 'Hours per night', clinical: 'Sleep', unit: 'hrs/night',
+    key: 'sleep', format: function (v) { return v.toFixed(1); }, suffix: 'hrs', gated: false },
+  { id: 'skinTemp', label: 'Skin temperature', sub: 'Nightly average', clinical: 'Skin temp', unit: '°C',
+    key: 'skinTemp', format: function (v) { return v.toFixed(1); }, suffix: '°C', gated: true }
+];
+var M = {};
+METRICS.forEach(function (m) { M[m.id] = m; });
+
+function grad(a, b) { return 'background-image:linear-gradient(to bottom right,' + a + ',' + b + ')'; }
+var TINT = {
+  slate: grad('#475569', '#1e293b'),
+  rose: grad('#fb7185', '#ef4444'),
+  sky: grad('#38bdf8', '#3b82f6'),
+  tealsrc: grad('#2dd4bf', '#0d9488'),
+  violet: grad('#a78bfa', '#9333ea'),
+  teal: grad('#14b8a6', '#0f766e'),
+  blue: grad('#0ea5e9', '#2563eb'),
+  blue7: grad('#0ea5e9', '#1d4ed8'),
+  gray: grad('#d1d5db', '#9ca3af'),
+  gray2: grad('#9ca3af', '#6b7280'),
+  emerald: grad('#10b981', '#047857'),
+  violet2: grad('#8b5cf6', '#9333ea')
+};
+
+var SOURCES = [
+  { id: 'whoop', name: 'WHOOP', kind: 'Wearable band', available: true, tint: TINT.slate, mark: 'W' },
+  { id: 'apple', name: 'Apple Health', kind: 'Phone health app', available: true, tint: TINT.rose, mark: 'A' },
+  { id: 'garmin', name: 'Garmin', kind: 'Watch', available: false, tint: TINT.sky, mark: 'G' },
+  { id: 'fitbit', name: 'Fitbit', kind: 'Watch', available: false, tint: TINT.tealsrc, mark: 'F' },
+  { id: 'oura', name: 'Oura', kind: 'Ring', available: false, tint: TINT.violet, mark: 'O' }
+];
+var SRC = {};
+SOURCES.forEach(function (s) { SRC[s.id] = s; });
+
+var HEALTH_SYSTEMS = [
+  { id: 'crossroads', name: 'Crossroads Health', match: true, note: 'Your record was found' },
+  { id: 'riverbend', name: 'Riverbend Health', match: false, note: 'No record on file' }
+];
+var PLANS = [
+  { id: 'ppo', name: 'Plan A (PPO)', note: 'From your portal profile' },
+  { id: 'hmo', name: 'Plan B (HMO)', note: 'Add manually' }
+];
+
+var PATIENT = { name: 'Jordan M.', initials: 'JM', age: 42, mrn: '****4821', pcp: 'Dr. Benner' };
+var CLINICIAN = { name: 'Dr. Benner', role: 'Primary care', org: 'Crossroads Health' };
+var RECIPIENT = 'Dr. Benner · Primary care · Crossroads Health';
+
+var HUB_SOURCES = [
+  { id: 'whoop', name: 'WHOOP', status: 'Live', approved: 'HR, steps, sleep', inReview: 'Skin temp', lastSync: '2 min ago',
+    translation: [
+      { metric: 'Resting HR', rule: 'bpm · daily avg → Vitals: Pulse (resting)' },
+      { metric: 'Steps', rule: 'count · daily total → Activity flowsheet' },
+      { metric: 'Sleep', rule: 'minutes → hours · nightly → Sleep flowsheet' },
+      { metric: 'Timestamps', rule: 'device time → UTC → shown in local time' }
+    ] },
+  { id: 'apple', name: 'Apple Health', status: 'Pilot', approved: 'Steps', inReview: 'HR, sleep', lastSync: '1 hr ago',
+    translation: [
+      { metric: 'Steps', rule: 'count · daily total → Activity flowsheet' },
+      { metric: 'Identity', rule: 'portal login match · pending clinic rollout' }
+    ] },
+  { id: 'garmin', name: 'Garmin', status: 'Paused', approved: 'None', inReview: 'None', lastSync: 'Revisit Q1',
+    translation: [{ metric: 'All metrics', rule: 'paused — no budget this fiscal year' }] },
+  { id: 'fitbit', name: 'Fitbit', status: 'Intake', approved: 'None', inReview: 'All', lastSync: 'Not started', translation: [] },
+  { id: 'oura', name: 'Oura', status: 'Intake', approved: 'None', inReview: 'All', lastSync: 'Not started', translation: [] }
+];
+
+var SIGNOFF_TEAMS = [
+  { id: 'vendor', name: 'Vendor review', owner: 'Procurement' },
+  { id: 'security', name: 'Security', owner: 'InfoSec' },
+  { id: 'compliance', name: 'Compliance', owner: 'Privacy office' },
+  { id: 'informatics', name: 'Clinical informatics', owner: 'Clinical lead' },
+  { id: 'appteam', name: 'App team', owner: 'Portal engineering' }
+];
+
+var INITIAL_DETERMINATIONS = [
+  { date: 'Apr 2, 2026', source: 'WHOOP · Steps', decision: 'Approved', rationale: 'Daily totals only, no minute-level data', by: 'Compliance' },
+  { date: 'Mar 18, 2026', source: 'Apple Health · HR', decision: 'Deferred', rationale: 'Needs identity match at clinic level first', by: 'Integration' },
+  { date: 'Feb 9, 2026', source: 'Garmin · all metrics', decision: 'Paused', rationale: 'No budget this fiscal year, revisit Q1', by: 'IT leadership' },
+  { date: 'Jan 22, 2026', source: 'Any · raw GPS', decision: 'Declined', rationale: 'Not needed for care, privacy risk', by: 'Legal' }
+];
+
+var PROFILES = {
+  patientNew: { label: 'New patient', person: 'Riley T.', initials: 'RT', role: 'Patient portal', group: 'Patient', tint: TINT.violet },
+  patientExisting: { label: 'Existing patient', person: 'Jordan M.', initials: 'JM', role: 'Patient portal', group: 'Patient', tint: TINT.teal },
+  clinician: { label: 'Clinician', person: 'Dr. Benner', initials: 'DB', role: 'Primary care', group: 'Care team', tint: TINT.blue7 },
+  hub: { label: 'Admin', person: 'Arun R.', initials: 'AR', role: 'Clinical systems integration', group: 'Care team', tint: TINT.slate }
+};
+
+var START = {
+  patientNew: { phone: 'P1', laptop: 'L0' },
+  patientExisting: { phone: 'P5', laptop: 'L1' },
+  clinician: { phone: 'C4', laptop: 'C1' },
+  hub: { phone: 'A3', laptop: 'A1' }
+};
+
+var ORDER_LABELS = {
+  pt: 'Refer to physical therapy',
+  preop: 'Start pre-op program',
+  continueSharing: 'Continue sharing · goal 4,000 steps/day',
+  notify: 'Notify patient in portal'
+};
+var CAREPLAN_LABELS = {
+  pt: 'Physical therapy referral',
+  preop: 'Start pre-op program',
+  continueSharing: 'Keep sharing · goal 4,000 steps/day',
+  notify: 'Portal notification sent'
+};
+
+function fmtDate(iso, opts) {
+  return new Date(iso + 'T00:00:00Z').toLocaleDateString('en-US',
+    Object.assign({ month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }, opts || {}));
+}
+function fmtShort(iso) { return fmtDate(iso, { year: undefined }); }
+
+/* =====================================================================
+   2. STATE
+   ===================================================================== */
+
+var ESTABLISHED_CONSENT = {
+  metrics: { hr: true, steps: true, sleep: true, skinTemp: false },
+  recipient: RECIPIENT, start: CONSENT_START, end: CONSENT_END, ongoing: true,
+  version: 3, createdAt: '2026-03-01T10:24:00.000Z', source: 'WHOOP'
+};
+
+function makePatient(over) {
+  return Object.assign({
+    connected: {}, portalStep: 0, location: 'Indianapolis, IN', healthSystem: null, plan: 'ppo',
+    metrics: { hr: true, steps: true, sleep: true, skinTemp: false }, revoked: {},
+    start: CONSENT_START, end: CONSENT_END, ongoing: true, agreed: false, sharing: false,
+    consent: null, uploads: []
+  }, over || {});
+}
+
+function initial() {
+  return {
+    profile: 'patientNew',
+    devices: { patientNew: 'laptop', patientExisting: 'phone', clinician: 'laptop', hub: 'laptop' },
+    screens: {
+      patientNew: Object.assign({}, START.patientNew),
+      patientExisting: Object.assign({}, START.patientExisting),
+      clinician: Object.assign({}, START.clinician),
+      hub: Object.assign({}, START.hub)
+    },
+    patients: {
+      'new': makePatient(),
+      existing: makePatient({
+        connected: { whoop: true }, healthSystem: 'crossroads', agreed: true,
+        // Cloned, so a reset always restores the original record.
+        consent: Object.assign({}, ESTABLISHED_CONSENT, { metrics: Object.assign({}, ESTABLISHED_CONSENT.metrics) })
+      })
+    },
+    clinician: {
+      range: '60d', focusMetric: 'steps', patientView: false, consentModal: false,
+      flagDismissed: false, noteInserted: false,
+      noteFreeText: 'Knee pain limiting walking since mid-March. Discussed PT before surgery consult.',
+      orders: { pt: false, preop: false, continueSharing: false, notify: false },
+      noteSigned: false, signedAt: null, reviewed: {}
+    },
+    hub: {
+      selectedSource: 'whoop',
+      signoffs: { vendor: 'approved', security: 'approved', compliance: 'waiting', informatics: 'waiting', appteam: 'waiting' },
+      skinTempStatus: 'in_review', determinations: INITIAL_DETERMINATIONS.slice(), nudged: {}
+    },
+    ui: {
+      menu: null, dateModal: false, decisionModal: null, uploadMode: 'connect', dragging: false,
+      rationale: '', revisit: '2026-12-01', queryQueue: '', queryLog: '', queryMap: ''
+    }
+  };
+}
+
+var S = initial();
+
+/* Derived ------------------------------------------------------------ */
+var patientKey = function () { return S.profile === 'patientNew' ? 'new' : 'existing'; };
+var P = function () { return S.patients[patientKey()]; };
+var CP = function () { return S.patients.existing; };
+var device = function () { return S.devices[S.profile]; };
+var screenId = function () { return S.screens[S.profile][device()]; };
+var skinOK = function () { return S.hub.skinTempStatus === 'approved'; };
+
+function sharedOf(p) {
+  if (!p || !p.consent) return [];
+  return Object.keys(p.consent.metrics).filter(function (id) {
+    return p.consent.metrics[id] && (id !== 'skinTemp' || skinOK());
+  });
+}
+var sharedMetrics = function () { return sharedOf(P()); };
+var clinicalShared = function () { return sharedOf(CP()); };
+var pendingSignoffs = function () {
+  return SIGNOFF_TEAMS.filter(function (t) { return S.hub.signoffs[t.id] !== 'approved'; }).length;
+};
+var carePlanVisible = function () { return S.clinician.noteSigned; };
+
+/* =====================================================================
+   3. RENDER ENGINE
+   ===================================================================== */
+
+var root = document.getElementById('root');
+var charts = {};   // chart id -> { points, width, format }
+var chartSeq = 0;
+
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function cls() {
+  return Array.prototype.filter.call(arguments, Boolean).join(' ');
+}
+function join(arr) { return arr.join(''); }
+function map(arr, fn) { return arr.map(fn).join(''); }
+
+function captureFocus() {
+  var a = document.activeElement;
+  if (!a || !a.dataset || !a.dataset.f) return null;
+  var out = { k: a.dataset.f };
+  try { out.s = a.selectionStart; out.e = a.selectionEnd; } catch (err) { /* not a text field */ }
+  return out;
+}
+function restoreFocus(f) {
+  if (!f) return;
+  var el = root.querySelector('[data-f="' + f.k + '"]');
+  if (!el) return;
+  el.focus();
+  if (f.s != null) { try { el.setSelectionRange(f.s, f.e); } catch (err) { /* ignore */ } }
+}
+
+// Synchronous on purpose: renders are cheap, and requestAnimationFrame is
+// throttled in background tabs, which would leave clicks looking dead.
+var rendering = false;
+function render() {
+  if (rendering) return;
+  rendering = true;
+  try {
+    var f = captureFocus();
+    charts = {};
+    root.innerHTML = view();
+    restoreFocus(f);
+  } finally {
+    rendering = false;
+  }
+}
+
+/* =====================================================================
+   4. UI VOCABULARY
+   Every screen composes these, so visual style stays consistent.
+   ===================================================================== */
+
+// Builds the data-attributes that the delegated click handler reads.
+function A(o) {
+  if (!o || !o.a) return '';
+  return ' data-a="' + esc(o.a) + '"' +
+    (o.p != null ? ' data-p="' + esc(o.p) + '"' : '') +
+    (o.q != null ? ' data-q="' + esc(o.q) + '"' : '');
+}
+
+var ICON = {
+  check: '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 10.5l4 4 8-9" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  checkBox: '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="#fff" stroke-width="3"><path d="M4 10.5l4 4 8-9" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  bigCheck: '<svg viewBox="0 0 20 20" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 10.5l4 4 8-9" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  close: '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 5l10 10M15 5L5 15" stroke-linecap="round"/></svg>',
+  chevUp: '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 12.5l4-4 4 4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  monitor: '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="3.5" width="16" height="11" rx="1.6"/><path d="M7 17.5h6M10 14.5v3" stroke-linecap="round"/></svg>',
+  phone: '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5.5" y="2" width="9" height="16" rx="2"/><path d="M8.75 15.25h2.5" stroke-linecap="round"/></svg>',
+  upload: '<svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 14V4M6 8l4-4 4 4M4 15v1a1 1 0 001 1h10a1 1 0 001-1v-1" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  signal: '<svg viewBox="0 0 18 12" width="18" height="12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>',
+  wifi: '<svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 4.2a10 10 0 0 1 14 0" stroke-linecap="round"/><path d="M3.6 7a6.4 6.4 0 0 1 8.8 0" stroke-linecap="round"/><path d="M6.3 9.7a2.6 2.6 0 0 1 3.4 0" stroke-linecap="round"/></svg>',
+  battery: '<svg viewBox="0 0 26 12" width="26" height="12" fill="none"><rect x="0.6" y="0.6" width="21" height="10.8" rx="3" stroke="currentColor" stroke-width="1.2" opacity="0.4"/><rect x="2.2" y="2.2" width="17.8" height="7.6" rx="1.8" fill="currentColor"/><path d="M23.5 4.3v3.4a2 2 0 0 0 0-3.4z" fill="currentColor" opacity="0.4"/></svg>'
+};
+
+/* ------------------------------- Button -------------------------------- */
+function Btn(o) {
+  return '<button class="' + cls('btn', o.variant, o.size === 'sm' && 'sm', o.full && 'full', o.cls) + '"' +
+    (o.disabled ? ' disabled' : A(o)) +
+    (o.title ? ' title="' + esc(o.title) + '"' : '') + '>' + o.label + '</button>';
+}
+function TLink(label, o) { return '<button class="tlink"' + A(o) + '>' + label + '</button>'; }
+
+/* ---------------------------- Form controls ---------------------------- */
+function Toggle(o) {
+  return '<button type="button" role="switch" aria-checked="' + !!o.checked + '" aria-label="' + esc(o.label || '') + '" ' +
+    'class="' + cls('toggle', o.checked && 'on') + '"' + (o.disabled ? ' disabled' : A(o)) + '><i></i></button>';
+}
+function Cbx(o) {
+  return '<button type="button" role="checkbox" aria-checked="' + !!o.checked + '" ' +
+    'class="' + cls('cbx', o.checked && 'on') + '"' + (o.disabled ? ' disabled' : A(o)) + '>' +
+    '<span class="ind">' + (o.checked ? ICON.checkBox : '') + '</span>' +
+    '<span>' + o.label + '</span></button>';
+}
+function Radio(o) {
+  return '<button type="button" role="radio" aria-checked="' + !!o.checked + '" aria-label="' + esc(o.label || '') + '" ' +
+    'class="' + cls('radio', o.checked && 'on') + '"' + A(o) + '>' + (o.checked ? '<i></i>' : '') + '</button>';
+}
+function Input(o) {
+  return '<input class="' + cls('inp', o.cls) + '" type="' + (o.type || 'text') + '" value="' + esc(o.value) + '"' +
+    ' data-in="' + esc(o.on) + '" data-f="' + esc(o.f) + '"' + (o.p != null ? ' data-p="' + esc(o.p) + '"' : '') +
+    (o.placeholder ? ' placeholder="' + esc(o.placeholder) + '"' : '') + ' />';
+}
+function TArea(o) {
+  return '<textarea class="' + cls('ta', o.cls) + '" rows="' + (o.rows || 4) + '"' +
+    (o.readonly ? ' readonly' : ' data-in="' + esc(o.on) + '"') + ' data-f="' + esc(o.f) + '"' +
+    (o.placeholder ? ' placeholder="' + esc(o.placeholder) + '"' : '') + '>' + esc(o.value) + '</textarea>';
+}
+function Field(label, control, hint) {
+  return '<div class="fgroup"><label class="flabel">' + label + '</label>' + control +
+    (hint ? '<p class="fhint">' + hint + '</p>' : '') + '</div>';
+}
+
+/* --------------------------- Layout primitives -------------------------- */
+function Card(inner) { return '<div class="card">' + inner + '</div>'; }
+function Row(o, inner) {
+  return '<div class="' + cls('row', o.muted && 'muted', o.sel && 'sel', o.bad && 'bad', o.a && 'click') + '"' +
+    A(o) + '>' + inner + '</div>';
+}
+function Tile(o) {
+  if (o.muted) return '<span class="' + cls('tile', 'muted', o.sm && 'sm') + '">' + esc(o.mark) + '</span>';
+  return '<span class="' + cls('tile', o.sm && 'sm') + '" style="' + o.tint + '">' + esc(o.mark) + '</span>';
+}
+function RowText(title, sub, muted) {
+  return '<span class="' + cls('rowtext', muted && 'muted') + '"><b>' + title + '</b>' +
+    (sub ? '<span>' + sub + '</span>' : '') + '</span>';
+}
+function Chip(label, tone) { return '<span class="' + cls('chip', tone) + '">' + label + '</span>'; }
+function Callout(inner, tone) { return '<div class="' + cls('callout', tone) + '">' + inner + '</div>'; }
+function Empty(title, body, tall) {
+  return '<div class="' + cls('empty', tall && 'tall') + '">' + (title ? '<b>' + title + '</b>' : '') +
+    (body ? '<p>' + body + '</p>' : '') + '</div>';
+}
+function SecLabel(t, c) { return '<h2 class="' + cls('seclabel', c) + '">' + t + '</h2>'; }
+function ScreenTitle(o) {
+  return '<div class="screentitle">' + (o.step ? '<p class="step">' + o.step + '</p>' : '') +
+    '<h1>' + o.title + '</h1>' + (o.body ? '<p>' + o.body + '</p>' : '') + '</div>';
+}
+function Stat(o) {
+  return '<div class="' + cls('stat', o.attention && 'attention') + '"><p class="lab">' + o.label + '</p>' +
+    '<p class="val">' + o.value + '</p>' + (o.hint ? '<p class="hint">' + o.hint + '</p>' : '') + '</div>';
+}
+function Panel(o, inner) {
+  var head = (o.title || o.actions)
+    ? '<div class="panel-head"><div style="min-width:0">' + (o.title ? '<h3>' + o.title + '</h3>' : '') +
+      (o.sub ? '<p class="sub">' + o.sub + '</p>' : '') + '</div>' + (o.actions || '') + '</div>'
+    : '';
+  return '<section class="' + cls('panel', o.cls) + '">' + head + '<div class="panel-body">' + inner + '</div></section>';
+}
+function PageHead(o) {
+  return '<div class="pagehead"><div style="min-width:0"><h1>' + o.title + '</h1>' +
+    (o.sub ? '<p class="sub">' + o.sub + '</p>' : '') + '</div>' +
+    (o.actions ? '<div class="pagehead-actions">' + o.actions + '</div>' : '') + '</div>';
+}
+function PageBody(inner, c) { return '<div class="' + cls('pagebody', c) + '">' + inner + '</div>'; }
+function DefList(items, width) {
+  return '<dl class="' + cls('deflist', width) + '">' + map(items, function (it) {
+    return '<div><dt>' + it.label + '</dt><dd>' + it.value + '</dd></div>';
+  }) + '</dl>';
+}
+function Table(cols, rows, cell, tight) {
+  return '<div class="' + cls('tablewrap', tight && 'tight') + '"><table><thead><tr>' +
+    map(cols, function (c) { return '<th>' + c + '</th>'; }) + '</tr></thead><tbody>' +
+    (rows.length ? map(rows, function (r, i) {
+      return '<tr>' + map(cols, function (c) { return '<td>' + (cell ? cell(r, c, i) : esc(r[c])) + '</td>'; }) + '</tr>';
+    }) : '<tr><td class="tcenter" colspan="' + cols.length + '">No entries match that search.</td></tr>') +
+    '</tbody></table></div>';
+}
+
+/* -------------------------------- Modal --------------------------------- */
+function Modal(o, inner, foot) {
+  return '<div class="backdrop" data-a="' + esc(o.close) + '"><div class="' + cls('modal', o.md && 'md') +
+    '" role="dialog" aria-modal="true" data-stop="1">' +
+    '<div class="modal-head"><h3>' + o.title + '</h3>' +
+    '<button class="iconbtn" aria-label="Close" data-a="' + esc(o.close) + '">' + ICON.close + '</button></div>' +
+    '<div class="modal-body">' + inner + (foot ? '<div class="modal-foot">' + foot + '</div>' : '') + '</div></div></div>';
+}
+
+/* --------------------------- Account / device --------------------------- */
+function DevToggle() {
+  var d = device();
+  return '<div class="devtoggle" role="group" aria-label="Display">' +
+    '<button class="' + (d === 'laptop' ? 'on' : '') + '" title="Laptop view" aria-label="Laptop view"' +
+    A({ a: 'setDevice', p: 'laptop' }) + '>' + ICON.monitor + '</button>' +
+    '<button class="' + (d === 'phone' ? 'on' : '') + '" title="Phone view" aria-label="Phone view"' +
+    A({ a: 'setDevice', p: 'phone' }) + '>' + ICON.phone + '</button></div>';
+}
+
+function ProfileMenu(placement) {
+  return '<div class="' + cls('menu', placement) + '" data-stop="1">' +
+    map(['Patient', 'Care team'], function (group) {
+      return '<div><p class="grouplab">' + group + '</p>' +
+        map(Object.keys(PROFILES).filter(function (id) { return PROFILES[id].group === group; }), function (id) {
+          var p = PROFILES[id], active = S.profile === id;
+          return '<button class="' + cls('menu-item', active && 'active') + '"' + A({ a: 'setProfile', p: id }) + '>' +
+            '<span class="avatar sm" style="' + p.tint + '">' + p.initials + '</span>' +
+            '<span class="m"><b>' + p.label + '</b><span>' + p.person + '</span></span>' +
+            (active ? '<span class="tick">' + ICON.check + '</span>' : '') + '</button>';
+        }) + '</div>';
+    }) +
+    '<button class="menu-reset"' + A({ a: 'resetAll' }) + '>Reset session</button></div>';
+}
+
+// Sidebar footer variant — sits in the layout, so it never covers content.
+function AcctMenu() {
+  var p = PROFILES[S.profile];
+  return '<div class="acct" data-menu="1">' +
+    (S.ui.menu === 'side' ? ProfileMenu('up') : '') +
+    '<button class="acct-btn" aria-expanded="' + (S.ui.menu === 'side') + '"' + A({ a: 'menu', p: 'side' }) + '>' +
+    '<span class="avatar lg" style="' + p.tint + '">' + p.initials + '</span>' +
+    '<span class="acct-meta"><b>' + p.person + '</b><span>' + p.role + '</span></span>' +
+    '<span style="color:var(--g400);line-height:0;flex:none">' + ICON.chevUp + '</span></button>' +
+    '<div class="acct-view"><span>View</span>' + DevToggle() + '</div></div>';
+}
+
+function SideNav(o) {
+  return '<aside class="sidenav"><div class="sidenav-brand">' +
+    '<span class="brandmark" style="' + o.tint + '">' + o.mark + '</span><b>' + o.brand + '</b></div>' +
+    '<nav class="sidenav-list">' + map(o.items, function (it) {
+      return '<button class="' + cls('navitem', it.id === o.active && 'active') + '"' + A({ a: 'go', p: it.id }) + '>' +
+        it.label + '</button>';
+    }) + '</nav>' + AcctMenu() + '</aside>';
+}
+
+function Shell(nav, inner) {
+  return '<div class="app">' + SideNav(nav) + '<div class="main">' + inner + '</div></div>';
+}
+
+/* -------------------------------- Phone --------------------------------- */
+function PhoneFrame(inner) {
+  return '<div class="phone-stage"><div class="phone-wrap"><div class="phone"><div class="phone-screen">' +
+    '<div class="statusbar"><span class="time">9:41</span><div class="notch"></div>' +
+    '<div class="icons">' + ICON.signal + ICON.wifi + ICON.battery + '</div></div>' +
+    '<div class="phone-scroll">' + inner + '</div>' +
+    '<div class="homebar"><i></i></div></div></div></div></div>';
+}
+
+// Portal name sits inside the scroll area — never in the status bar, where it
+// competed with the notch and got truncated.
+function AppHeader(o) {
+  o = o || {};
+  var p = PROFILES[S.profile];
+  return '<div class="appheader"><div class="top">' +
+    '<p class="org">' + (o.org || 'Crossroads Health Portal') + '</p>' +
+    '<div class="right">' + DevToggle() +
+    '<div class="avwrap" data-menu="1">' +
+    '<button class="avatar sm ring" style="' + p.tint + '" aria-label="Signed in as ' + esc(p.person) + '"' +
+    A({ a: 'menu', p: 'avatar' }) + '>' + p.initials + '</button>' +
+    (S.ui.menu === 'avatar' ? ProfileMenu('down') : '') + '</div></div></div>' +
+    ((o.back || o.step)
+      ? '<div class="nav">' + (o.back ? '<button class="backbtn"' + A({ a: 'go', p: o.back }) + '><i>‹</i> Back</button>' : '<span></span>') +
+        (o.step ? '<span class="stepnum">' + o.step + '</span>' : '') + '</div>'
+      : '') +
+    '</div>';
+}
+
+function PScreen(header, body, foot) {
+  return '<div class="pscreen">' + header + '<div class="' + cls('pbody', !foot && 'pb') + '">' + body + '</div>' +
+    (foot ? '<div class="pfoot">' + foot + '</div>' : '') + '</div>';
+}
+
+/* =====================================================================
+   CHARTS — daily averages only, drawn as inline SVG.
+   Missing days render as gaps, never as zero.
+   ===================================================================== */
+
+function segments(points) {
+  var runs = [], run = [];
+  points.forEach(function (p) {
+    if (p.v === null || p.v === undefined) { if (run.length) runs.push(run); run = []; }
+    else run.push(p);
+  });
+  if (run.length) runs.push(run);
+  return runs;
+}
+
+function scales(data, key, width, height, pad) {
+  var vals = data.map(function (d) { return d[key]; }).filter(function (v) { return v !== null; });
+  var min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+  var span = (max - min) || 1, lo = min - span * 0.2, hi = max + span * 0.2;
+  var innerW = width - pad.l - pad.r, innerH = height - pad.t - pad.b;
+  var points = data.map(function (d, i) {
+    var x = pad.l + (data.length <= 1 ? 0 : (i / (data.length - 1)) * innerW);
+    var v = d[key];
+    return { i: i, x: x, v: v, date: d.date, y: v === null ? null : pad.t + innerH - ((v - lo) / (hi - lo)) * innerH };
+  });
+  return { points: points, lo: lo, hi: hi, innerH: innerH, innerW: innerW };
+}
+
+function linePath(run) {
+  return run.map(function (p, j) { return (j === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ');
+}
+function areaPath(run, baseY) {
+  return linePath(run) + ' L' + run[run.length - 1].x.toFixed(1) + ',' + baseY.toFixed(1) +
+    ' L' + run[0].x.toFixed(1) + ',' + baseY.toFixed(1) + ' Z';
+}
+
+function Sparkline(data, key, width, height) {
+  width = width || 560; height = height || 44;
+  var pad = { l: 1, r: 1, t: 5, b: 5 };
+  var sc = scales(data, key, width, height, pad);
+  var runs = segments(sc.points);
+  var gid = 'sg' + (chartSeq++);
+  var base = pad.t + sc.innerH;
+  return '<svg viewBox="0 0 ' + width + ' ' + height + '" preserveAspectRatio="none" role="img" aria-label="Trend">' +
+    '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1">' +
+    '<stop offset="0%" stop-color="rgb(13 148 136)" stop-opacity="0.22"/>' +
+    '<stop offset="100%" stop-color="rgb(13 148 136)" stop-opacity="0"/></linearGradient></defs>' +
+    map(runs, function (r) { return '<path d="' + areaPath(r, base) + '" fill="url(#' + gid + ')"/>'; }) +
+    map(runs, function (r) {
+      return '<path d="' + linePath(r) + '" fill="none" stroke="rgb(15 118 110)" stroke-width="1.75" ' +
+        'stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>';
+    }) + '</svg>';
+}
+
+function TrendChart(o) {
+  var data = o.data, key = o.key, height = o.height || 280, width = 880;
+  var pad = { l: 56, r: 20, t: 24, b: 34 };
+  var sc = scales(data, key, width, height, pad);
+  var runs = segments(sc.points);
+  var base = pad.t + sc.innerH;
+  var gid = 'tg' + (chartSeq++);
+  var cid = 'c' + chartSeq;
+  var yOf = function (v) { return pad.t + sc.innerH - ((v - sc.lo) / (sc.hi - sc.lo)) * sc.innerH; };
+  var ticks = [0, 1, 2, 3].map(function (i) { return sc.lo + ((sc.hi - sc.lo) / 3) * i; });
+  var labelEvery = Math.max(1, Math.ceil(data.length / 8));
+  var markerIdx = o.markerDate ? data.map(function (d) { return d.date; }).indexOf(o.markerDate) : -1;
+  var marker = markerIdx >= 0 ? sc.points[markerIdx] : null;
+
+  charts[cid] = { points: sc.points, width: width, format: o.format, top: pad.t, bottom: base };
+
+  return '<div class="chartwrap" data-chart="' + cid + '">' +
+    '<svg viewBox="0 0 ' + width + ' ' + height + '" role="img" aria-label="' + esc(key) + ' trend">' +
+    '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1">' +
+    '<stop offset="0%" stop-color="rgb(13 148 136)" stop-opacity="0.2"/>' +
+    '<stop offset="100%" stop-color="rgb(13 148 136)" stop-opacity="0"/></linearGradient></defs>' +
+    map(ticks, function (t) {
+      var y = yOf(t);
+      return '<line x1="' + pad.l + '" x2="' + (width - pad.r) + '" y1="' + y + '" y2="' + y +
+        '" stroke="rgb(229 231 235)" stroke-width="1"/>' +
+        '<text class="axis" x="' + (pad.l - 12) + '" y="' + (y + 4) + '" text-anchor="end">' +
+        (key === 'steps' ? num(t) : t.toFixed(key === 'hr' ? 0 : 1)) + '</text>';
+    }) +
+    map(runs, function (r) { return '<path d="' + areaPath(r, base) + '" fill="url(#' + gid + ')"/>'; }) +
+    (marker
+      ? '<line x1="' + marker.x + '" x2="' + marker.x + '" y1="' + pad.t + '" y2="' + base +
+        '" stroke="rgb(217 119 6)" stroke-width="1.5" stroke-dasharray="4 3"/>' +
+        '<text class="markerlab" x="' + (marker.x + 8) + '" y="' + (pad.t + 12) + '">' + esc(o.markerLabel) + '</text>'
+      : '') +
+    map(runs, function (r) {
+      return '<path d="' + linePath(r) + '" fill="none" stroke="rgb(15 118 110)" stroke-width="2.25" ' +
+        'stroke-linejoin="round" stroke-linecap="round"/>';
+    }) +
+    map(sc.points.filter(function (p, i) { return i % labelEvery === 0; }), function (p) {
+      return '<text class="axis" x="' + p.x + '" y="' + (height - 10) + '" text-anchor="middle">' + fmtShort(p.date) + '</text>';
+    }) +
+    '<g class="hoverg"></g></svg>' +
+    '<div class="tip"><b></b><span></span></div>' +
+    (o.unit ? '<div class="unitlab">' + esc(o.unit) + '</div>' : '') + '</div>';
+}
+
+/* =====================================================================
+   5. PATIENT SCREENS
+   ===================================================================== */
+
+var PORTAL_NAV = [
+  { id: 'L-home', label: 'Home' },
+  { id: 'L-messages', label: 'Messages' },
+  { id: 'L-results', label: 'Test results' },
+  { id: 'L-appointments', label: 'Appointments' },
+  { id: 'L1', label: 'Share my data' }
+];
+function PortalShell(active, inner) {
+  return Shell({ brand: 'Crossroads Health', mark: 'CH', tint: TINT.teal, items: PORTAL_NAV, active: active }, inner);
+}
+
+/* ------------------------------ Shared bits ------------------------------ */
+
+function SourceRows(onAct) {
+  var p = P();
+  return map(SOURCES, function (s) {
+    var isOn = !!p.connected[s.id], off = !s.available;
+    return Row({ muted: off, sel: isOn },
+      Tile({ tint: s.tint, mark: s.mark, muted: off }) +
+      RowText(s.name, off ? 'Not available yet' : isOn ? 'Connected · last sync 8 min ago' : s.kind, off) +
+      Btn({ label: isOn ? 'Disconnect' : 'Connect', size: 'sm', variant: isOn ? 'secondary' : '', disabled: off,
+            a: onAct, p: s.id }));
+  });
+}
+
+// Only the metrics switched on here ever leave the patient's device account.
+function MetricList() {
+  var p = P(), declined = S.hub.skinTempStatus === 'declined';
+  return Card(map(METRICS, function (m) {
+    var gated = m.gated && !skinOK();
+    var on = !!p.metrics[m.id] && !gated;
+    return Row({ muted: gated },
+      RowText(m.label, gated ? (declined ? 'Not approved by your health system' : 'Under review by your health system') : m.sub, gated) +
+      (gated ? Chip(declined ? 'Declined' : 'In review', declined ? 'danger' : 'warn') : '') +
+      Toggle({ checked: on, disabled: gated, label: m.label, a: 'toggleMetric', p: m.id }));
+  }));
+}
+
+function anyMetricOn() {
+  var p = P();
+  return METRICS.some(function (m) { return p.metrics[m.id] && (!m.gated || skinOK()); });
+}
+
+function DateModal() {
+  if (!S.ui.dateModal) return '';
+  var p = P();
+  return Modal({ title: 'Date range', close: 'closeDate', md: true },
+    Field('Start date', Input({ value: p.start, type: 'date', on: 'setStart', f: 'start' }),
+      'Cannot be earlier than 90 days before today.') +
+    Field('End date', Input({ value: p.end, type: 'date', on: 'setEnd', f: 'end' })) +
+    '<div class="fgroup">' + Card(Row({},
+      RowText('Keep sharing after the end date', 'Data keeps syncing until you turn it off') +
+      Toggle({ checked: p.ongoing, label: 'Ongoing sharing', a: 'toggleOngoing' }))) + '</div>',
+    Btn({ label: 'Done', a: 'closeDate' }));
+}
+
+/* ------------------------------ File upload ------------------------------ */
+
+function DropZone(tall) {
+  return '<div class="' + cls('dropzone', tall && 'tall', S.ui.dragging && 'drag') + '" data-drop="1">' +
+    '<div class="up">' + ICON.upload + '</div>' +
+    '<b>Drop a file here or click to browse</b>' +
+    '<p>CSV, XML or JSON · up to 25 MB</p>' +
+    '<input type="file" multiple hidden data-fileinput="1" /></div>';
+}
+
+function UploadList() {
+  var ups = P().uploads;
+  if (!ups.length) return '';
+  return Card(map(ups, function (u) {
+    var bad = u.status === 'error' || u.status === 'rejected';
+    var detail = u.status === 'checking' ? 'Checking format… ' + u.progress + '%'
+      : u.status === 'ready' ? 'Ready · ' + u.detail
+      : u.status === 'error' ? 'Needs fixing: missing timestamps'
+      : u.detail;
+    return Row({ bad: bad },
+      '<div class="uprow"><b>' + esc(u.name) + '</b><p>' + esc(detail) + '</p>' +
+      (u.status === 'checking' ? '<div class="progress"><i style="width:' + u.progress + '%"></i></div>' : '') + '</div>' +
+      (u.status === 'ready' ? Chip('Ready', 'success') : '') +
+      (bad ? Btn({ label: 'Replace', size: 'sm', variant: 'secondary', a: 'removeUpload', p: u.id }) : ''));
+  }));
+}
+
+var uploadsReady = function () {
+  var u = P().uploads;
+  return u.length > 0 && u.every(function (x) { return x.status === 'ready'; });
+};
+var readyCount = function () {
+  return P().uploads.filter(function (u) { return u.status === 'ready'; }).length;
+};
+
+/* ================================== P1 ================================== */
+
+function P1Connect() {
+  var count = Object.keys(P().connected).filter(function (k) { return P().connected[k]; }).length;
+  return PScreen(
+    AppHeader({ step: 'Step 1 of 3' }),
+    ScreenTitle({ step: 'Connect', title: 'Connect your device',
+      body: 'Your data stays in your device account until you choose what to share.' }) +
+    SecLabel('Your devices and apps') + Card(SourceRows('toggleSource')) +
+    '<div class="mt5">' + TLink('My device is not listed — upload a file instead', { a: 'go', p: 'P4' }) + '</div>',
+    Btn({ label: 'Continue', full: true, disabled: count === 0, a: 'go', p: 'P2' }) +
+    '<p class="hint">' + (count === 0 ? 'Connect at least one source to continue.'
+      : count + ' source' + (count > 1 ? 's' : '') + ' connected.') + '</p>'
+  );
+}
+
+/* ================================== P2 ================================== */
+
+function P2Care() {
+  var p = P();
+  return PScreen(
+    AppHeader({ step: 'Step 2 of 3', back: 'P1' }),
+    ScreenTitle({ step: 'Care team', title: 'Select your care',
+      body: 'Pick who should receive your data. We only show clinicians you already see.' }) +
+    Card(Row({}, RowText(p.location, 'Change location') + '<span class="chev">▾</span>')) +
+    SecLabel('Health system', 'mt6') +
+    Card(map(HEALTH_SYSTEMS, function (h) {
+      return Row({ muted: !h.match, sel: p.healthSystem === h.id, a: h.match ? 'setSystem' : null, p: h.id },
+        RowText(h.name, h.match ? h.note : 'Contact your clinic to link your record', !h.match) +
+        (h.match ? Radio({ checked: p.healthSystem === h.id, label: h.name, a: 'setSystem', p: h.id })
+                 : Chip('No match')));
+    })) +
+    SecLabel('Insurance plan', 'mt6') +
+    Card(map(PLANS, function (pl) {
+      return Row({ sel: p.plan === pl.id, a: 'setPlan', p: pl.id },
+        RowText(pl.name, pl.note) + Radio({ checked: p.plan === pl.id, label: pl.name, a: 'setPlan', p: pl.id }));
+    })) +
+    Callout('Remote monitoring may be covered by your plan. We will confirm before any charge.', 'teal mt4'),
+    Btn({ label: 'Continue', full: true, disabled: !p.healthSystem, a: 'go', p: 'P3' }) +
+    (!p.healthSystem ? '<p class="hint">Select a health system that has your record.</p>' : '')
+  );
+}
+
+/* ================================== P3 ================================== */
+
+function P3Scope() {
+  var p = P(), ok = anyMetricOn();
+  return PScreen(
+    AppHeader({ step: 'Step 3 of 3', back: 'P2' }),
+    ScreenTitle({ step: 'What to share', title: 'Share my data',
+      body: 'Choose exactly what to share. Only these metrics leave your device account.' }) +
+    MetricList() +
+    SecLabel('Sharing with', 'mt6') +
+    Card(Row({}, Tile({ tint: TINT.teal, mark: 'DB' }) +
+      RowText(CLINICIAN.name, CLINICIAN.role + ' · ' + CLINICIAN.org) + '<span class="chev">›</span>')) +
+    SecLabel('Date range', 'mt6') +
+    Card(Row({}, RowText(fmtDate(p.start) + ' to ' + fmtDate(p.end), 'Ongoing sharing: ' + (p.ongoing ? 'On' : 'Off')) +
+      Btn({ label: 'Edit', size: 'sm', variant: 'secondary', a: 'openDate' }))) +
+    '<div class="agreebox">' + Cbx({ checked: p.agreed, label: 'I agree to share these metrics with my care team', a: 'toggleAgreed' }) + '</div>' +
+    DateModal(),
+    Btn({ label: p.sharing ? 'Sharing…' : 'Share with my care team', full: true,
+          disabled: !ok || !p.agreed || p.sharing, a: 'share', p: 'P5' }) +
+    '<p class="hint">' + (!ok ? 'Turn on at least one metric.'
+      : !p.agreed ? 'Check the box above to continue.' : 'You can change or stop this at any time.') + '</p>'
+  );
+}
+
+/* ================================== P4 ================================== */
+
+function P4Upload() {
+  return PScreen(
+    AppHeader({ step: 'Fallback', back: 'P1' }),
+    ScreenTitle({ step: 'Upload', title: 'Upload a data file',
+      body: 'Use this if your device cannot connect directly. Export a file from your device app and add it here.' }) +
+    DropZone() +
+    (P().uploads.length ? SecLabel('Uploaded files', 'mt6') + UploadList() : '') +
+    (readyCount() > 0 ? Callout('Preview: ' + (readyCount() * 31) +
+      ' days · steps · times shown in your local time zone', 'teal mt4') : ''),
+    Btn({ label: 'Add to my shared data', full: true, disabled: !uploadsReady(), a: 'go', p: 'P3' }) +
+    Btn({ label: 'Try connecting a device instead', full: true, variant: 'secondary', a: 'go', p: 'P1' })
+  );
+}
+
+/* ================================== P5 ================================== */
+
+function P5Done() {
+  var p = P();
+  if (!p.consent) {
+    return PScreen(AppHeader({}),
+      ScreenTitle({ step: 'Stopped', title: 'Sharing stopped',
+        body: 'Your care team can no longer see new data. Data already shared stays in your medical record.' }) +
+      Btn({ label: 'Start sharing again', full: true, a: 'go', p: 'P3' }));
+  }
+
+  var shared = sharedMetrics().map(function (id) { return M[id].label.toLowerCase(); });
+  var orders = S.clinician.orders;
+  var placed = Object.keys(orders).filter(function (k) { return orders[k]; });
+
+  var carePlan = carePlanVisible()
+    ? Card(placed.length
+        ? map(placed, function (id) {
+            var tint = id === 'pt' ? TINT.teal : id === 'preop' ? TINT.blue : TINT.emerald;
+            var mark = id === 'pt' ? 'PT' : id === 'preop' ? 'OP' : id === 'continueSharing' ? '4k' : '✓';
+            return Row({}, Tile({ tint: tint, mark: mark }) +
+              RowText(CAREPLAN_LABELS[id], 'Added by ' + CLINICIAN.name) + '<span class="chev">›</span>');
+          })
+        : Row({}, RowText('No new care plan items', 'Your clinician signed the note without adding orders')))
+    : Empty('Nothing here yet', 'Care plan items appear after your clinician reviews your data and signs the visit note.');
+
+  return PScreen(AppHeader({}),
+    '<div class="successdot">' + ICON.bigCheck + '</div>' +
+    ScreenTitle({ title: 'You’re all set',
+      body: 'Your care team has been notified. We will keep sharing your selected data until ' + fmtDate(p.end) + '.' }) +
+    '<div class="notif"><div class="meta"><b>Crossroads Health</b><span>10:24 AM</span></div>' +
+    '<p class="title">You’re all set</p>' +
+    '<p class="body">Your care team has been notified. We will keep tracking your data.</p></div>' +
+    Card(
+      Row({}, RowText('Shared') + '<span class="rowval">' + (shared.length ? shared.join(', ') : 'nothing yet') + '</span>') +
+      Row({}, RowText('With') + '<span class="rowval">' + CLINICIAN.name + '</span>') +
+      Row({}, RowText('Status') + Chip('Up to date', 'success')) +
+      Row({}, RowText('Last sync') + '<span class="rowval">2 minutes ago</span>')
+    ) +
+    SecLabel('Your care plan', 'mt6') + carePlan +
+    SecLabel('Manage', 'mt6') +
+    Card(
+      Row({ a: 'go', p: 'P3' }, RowText('Manage sharing', 'Change metrics, dates, or stop sharing') + '<span class="chev">›</span>') +
+      Row({ a: 'stopSharing' }, RowText('Stop sharing my data', 'Takes effect immediately and is logged') + Chip('Stop', 'danger'))
+    )
+  );
+}
+
+/* ================================== L0 ================================== */
+
+var WELCOME_STEPS = [
+  { n: 1, title: 'Connect your device',
+    body: 'Link the app or band you already use. It takes about a minute, and you can disconnect whenever you want.' },
+  { n: 2, title: 'Choose your care team',
+    body: 'We only show clinicians you already see. Your record is matched automatically because you are signed in.' },
+  { n: 3, title: 'Pick what to share',
+    body: 'Every metric has its own switch. Share resting heart rate but not sleep, or change your mind next week.' }
+];
+
+function L0Welcome() {
+  return PortalShell('L1', PageBody(
+    '<div class="hero">' + Chip('New', 'teal') +
+    '<h1>Bring your device data into your care</h1>' +
+    '<p class="lede">Share activity, resting heart rate and sleep from your wearable with ' + CLINICIAN.name +
+    '. You choose exactly what is shared, who receives it, and for how long.</p>' +
+    '<div class="grid g3 steps">' + map(WELCOME_STEPS, function (s) {
+      return '<div class="stepcard"><span class="n">' + s.n + '</span><h2>' + s.title + '</h2><p>' + s.body + '</p></div>';
+    }) + '</div>' +
+    '<div class="never"><h2>What we will never do</h2><ul>' +
+    '<li>· Send anything to your care team before you finish and agree.</li>' +
+    '<li>· Share your data with your employer, your insurer, or anyone outside your care team.</li>' +
+    '<li>· Keep syncing after you switch a metric off. Stopping takes effect immediately.</li>' +
+    '</ul></div>' +
+    '<div class="herocta">' + Btn({ label: 'Get started', a: 'go', p: 'L1' }) +
+    Btn({ label: 'Not right now', variant: 'secondary', a: 'go', p: 'L-home' }) + '</div>' +
+    '<div class="works"><p class="lab">Works with</p><div class="list">' +
+    map(SOURCES, function (s) {
+      return '<span class="' + cls('item', !s.available && 'off') + '">' +
+        '<span class="' + cls('m', !s.available && 'off') + '"' + (s.available ? ' style="' + s.tint + '"' : '') + '>' + s.mark + '</span>' +
+        s.name + (!s.available ? '<span class="soon">soon</span>' : '') + '</span>';
+    }) + '</div></div></div>', 'white'));
+}
+
+/* ================================== L1 ================================== */
+
+var L1_STEPS = ['Connect a device', 'Choose your care team', 'Pick what to share'];
+
+function StepBar(current) {
+  return '<ol class="stepbar">' + map(L1_STEPS, function (label, i) {
+    var active = i === current, done = i < current;
+    return '<li><button class="' + cls(active && 'active', done && 'done') + '"' +
+      (done ? A({ a: 'setStep', p: i }) : ' disabled') + '>' +
+      '<span class="n">' + (done ? '✓' : i + 1) + '</span><span class="lab">' + label + '</span></button></li>';
+  }) + '</ol>';
+}
+
+function Onboarding() {
+  var p = P();
+  var anySource = Object.keys(p.connected).some(function (k) { return p.connected[k]; });
+  var step0Done = anySource || uploadsReady();   // uploading is an equal substitute for connecting
+  var connectMode = S.ui.uploadMode === 'connect';
+
+  var step0 = '<div class="grid gmain gap20">' +
+    (connectMode
+      ? Panel({ title: 'Your devices and apps', sub: 'Connect at least one source to continue.' },
+          Card(SourceRows('toggleSource')))
+      : Panel({ title: 'Upload a data file', sub: 'Export from your device app, then add the file here.' },
+          DropZone(true) + (P().uploads.length ? '<div class="mt4">' + UploadList() + '</div>' : '') +
+          (readyCount() > 0 ? Callout('Preview: ' + (readyCount() * 31) +
+            ' days · steps · times shown in your local time zone.', 'teal mt4') : ''))) +
+    (connectMode
+      ? Panel({ title: 'No device to connect?' },
+          '<p class="txt-sm">You can export a file from your device app and upload it instead. We accept CSV, XML and JSON.</p>' +
+          Btn({ label: 'Upload a file instead', variant: 'secondary', cls: 'mt4', a: 'uploadMode', p: 'upload' }))
+      : Panel({ title: 'Prefer to connect directly?' },
+          '<p class="txt-sm">A connected device keeps syncing on its own, so you do not have to upload a new file each time.</p>' +
+          Btn({ label: 'Connect a device instead', variant: 'secondary', cls: 'mt4', a: 'uploadMode', p: 'connect' }))) +
+    '</div>';
+
+  var step1 = '<div class="grid g2 gap20">' +
+    Panel({ title: 'Health system', sub: 'Showing systems near ' + p.location + '.' },
+      Card(map(HEALTH_SYSTEMS, function (h) {
+        return Row({ muted: !h.match, sel: p.healthSystem === h.id, a: h.match ? 'setSystem' : null, p: h.id },
+          RowText(h.name, h.match ? h.note : 'Contact your clinic to link your record', !h.match) +
+          (h.match ? Radio({ checked: p.healthSystem === h.id, label: h.name, a: 'setSystem', p: h.id }) : Chip('No match')));
+      })) +
+      (p.healthSystem ? Callout('Your record was matched automatically because you are signed in to the portal. ' +
+        'No staff step is needed.', 'teal mt4') : '')) +
+    Panel({ title: 'Insurance plan' },
+      Card(map(PLANS, function (pl) {
+        return Row({ sel: p.plan === pl.id, a: 'setPlan', p: pl.id },
+          RowText(pl.name, pl.note) + Radio({ checked: p.plan === pl.id, label: pl.name, a: 'setPlan', p: pl.id }));
+      })) +
+      Callout('Remote monitoring may be covered by your plan. We will confirm before any charge.', 'mt4')) +
+    '</div>';
+
+  var step2 = '<div class="grid g2 gap20">' +
+    Panel({ title: 'What to share', sub: 'Only the metrics you switch on leave your device account.' }, MetricList()) +
+    '<div class="stack20">' +
+    Panel({ title: 'Where it goes' }, Card(
+      Row({}, Tile({ tint: TINT.teal, mark: 'DB' }) + RowText(CLINICIAN.name, CLINICIAN.role + ' · ' + CLINICIAN.org)) +
+      Row({}, RowText(fmtDate(p.start) + ' to ' + fmtDate(p.end), 'Ongoing sharing: ' + (p.ongoing ? 'On' : 'Off')) +
+        Btn({ label: 'Edit', size: 'sm', variant: 'secondary', a: 'openDate' })))) +
+    Panel({ title: 'Confirm' },
+      Cbx({ checked: p.agreed, label: 'I agree to share these metrics with my care team', a: 'toggleAgreed' }) +
+      Btn({ label: p.sharing ? 'Sharing…' : 'Share with my care team', full: true, cls: 'mt4',
+            disabled: !anyMetricOn() || !p.agreed || p.sharing, a: 'share' }) +
+      (!anyMetricOn() ? '<p class="hint" style="margin-top:8px;text-align:center;font-size:12px;color:var(--g400)">Turn on at least one metric.</p>' : '')) +
+    '</div></div>';
+
+  return PageHead({ title: 'Share my wearable data',
+      sub: 'Three short steps. Nothing leaves your device account until you finish.',
+      actions: '<span class="muted-sm">Signed in as ' + PROFILES[S.profile].person + '</span>' }) +
+    PageBody(StepBar(p.portalStep) +
+      (p.portalStep === 0 ? step0 : p.portalStep === 1 ? step1 : step2) +
+      '<div class="stepnav">' +
+      Btn({ label: 'Back', variant: 'secondary', disabled: p.portalStep === 0, a: 'setStep', p: p.portalStep - 1 }) +
+      (p.portalStep < 2 ? Btn({ label: 'Continue',
+        disabled: (p.portalStep === 0 && !step0Done) || (p.portalStep === 1 && !p.healthSystem),
+        a: 'setStep', p: p.portalStep + 1 }) : '') +
+      '</div>') + DateModal();
+}
+
+function Manage() {
+  var p = P(), c = p.consent, orders = S.clinician.orders;
+  var placed = carePlanVisible() ? Object.keys(orders).filter(function (k) { return orders[k]; }) : [];
+  var connected = SOURCES.filter(function (s) { return p.connected[s.id]; });
+
+  return PageHead({ title: 'Share my wearable data',
+      sub: 'Sharing with ' + CLINICIAN.name + ' through ' + fmtDate(p.end) + '.',
+      actions: '<span class="muted-sm">Signed in as ' + PROFILES[S.profile].person + '</span>' }) +
+    PageBody(
+      Callout('<b>Sharing is active.</b> ' + CLINICIAN.name + ' can see the metrics below. You can change what you share ' +
+        'or stop sharing at any time, and it takes effect immediately.', 'success') +
+      '<div class="grid g2 gap20">' +
+      Panel({ title: 'What you’re sharing', sub: 'Switch a metric off to stop sending it right away.' }, MetricList()) +
+      '<div class="stack20">' +
+      Panel({ title: 'Where it goes' }, Card(
+        Row({}, Tile({ tint: TINT.teal, mark: 'DB' }) + RowText(CLINICIAN.name, CLINICIAN.role + ' · ' + CLINICIAN.org)) +
+        Row({}, RowText(fmtDate(p.start) + ' to ' + fmtDate(p.end), 'Ongoing sharing: ' + (p.ongoing ? 'On' : 'Off')) +
+          Btn({ label: 'Edit', size: 'sm', variant: 'secondary', a: 'openDate' })) +
+        Row({}, RowText('Sync status', 'Last sync 2 minutes ago') + Chip('Up to date', 'success')) +
+        Row({}, RowText('Consent record', 'Version ' + c.version + ' · recorded ' +
+          new Date(c.createdAt).toLocaleDateString()) + Chip('On file', 'teal')))) +
+      Panel({ title: 'Connected devices' }, Card(connected.length
+        ? map(connected, function (s) {
+            return Row({}, Tile({ tint: s.tint, mark: s.mark }) +
+              RowText(s.name, 'Connected · last sync 8 min ago') +
+              Btn({ label: 'Disconnect', size: 'sm', variant: 'secondary', a: 'toggleSource', p: s.id }));
+          })
+        : Row({}, RowText('No devices connected', 'Data will stop syncing until you reconnect one') + Chip('Paused', 'warn')))) +
+      '</div></div>' +
+      Panel({ title: 'Your care plan', sub: 'Added by your care team after reviewing your data.' },
+        placed.length
+          ? Card(map(placed, function (id) {
+              return Row({}, Tile({ tint: TINT.emerald, mark: '✓' }) +
+                RowText(CAREPLAN_LABELS[id], 'Added by ' + CLINICIAN.name) + Chip('New', 'success'));
+            }))
+          : '<p class="txt-sm">Care plan items appear here after ' + CLINICIAN.name +
+            ' reviews your data and signs the visit note.</p>') +
+      Panel({ title: 'Stop sharing' },
+        '<p class="txt-sm mb4">Your care team will no longer receive new data. Data already shared stays in your medical record.</p>' +
+        Btn({ label: 'Stop sharing my data', variant: 'danger', a: 'stopSharing' }))
+    ) + DateModal();
+}
+
+function L1Portal() { return PortalShell('L1', P().consent ? Manage() : Onboarding()); }
+
+/* --------------------------- Portal: other tabs --------------------------- */
+
+function PortalHome() {
+  var p = P(), first = PROFILES[S.profile].person.split(' ')[0];
+  var n = sharedMetrics().length;
+  return PortalShell('L-home',
+    PageHead({ title: 'Good morning, ' + first, sub: 'Here is what needs your attention today.' }) +
+    PageBody(
+      '<div class="grid g3">' +
+      Panel({ title: 'Next appointment' },
+        '<p style="font-size:14px;font-weight:500">Apr 30, 2026 · 10:15 AM</p>' +
+        '<p class="mt2 txt-xs">' + CLINICIAN.name + ' · Primary care</p>' +
+        Btn({ label: 'View details', size: 'sm', variant: 'secondary', cls: 'mt3' })) +
+      Panel({ title: 'Data sharing' }, p.consent
+        ? Chip('Active', 'success') + '<p class="mt2 txt-xs">Sharing ' + n + ' metric' + (n === 1 ? '' : 's') +
+          ' with ' + CLINICIAN.name + ' through ' + fmtDate(p.end) + '.</p>' +
+          Btn({ label: 'Manage sharing', size: 'sm', cls: 'mt3', a: 'go', p: 'L1' })
+        : Chip('Not set up') + '<p class="mt2 txt-xs">Connect a device to share activity with your care team.</p>' +
+          Btn({ label: 'Get started', size: 'sm', cls: 'mt3', a: 'go', p: 'L1' })) +
+      Panel({ title: 'Unread messages' },
+        '<p class="big-num">2</p><p class="mt2 txt-xs">From your care team</p>' +
+        Btn({ label: 'Open inbox', size: 'sm', variant: 'secondary', cls: 'mt3', a: 'go', p: 'L-messages' })) +
+      '</div>' +
+      Panel({ title: 'Recent activity' }, Card(
+        Row({}, Tile({ tint: TINT.teal, mark: '✓' }) + RowText('Test results released', 'Lipid panel · Apr 18, 2026') + Chip('New', 'teal')) +
+        Row({}, Tile({ tint: TINT.blue, mark: 'Rx' }) + RowText('Prescription refilled', 'Apr 12, 2026')) +
+        Row({}, Tile({ tint: TINT.gray2, mark: '$' }) + RowText('Statement available', 'Mar 2026 · $42.00 due'))))
+    ));
+}
+
+var MESSAGES = [
+  { from: 'Dr. Benner', subject: 'Your activity trend', date: 'Apr 30', unread: true,
+    preview: 'I had a look at the steps data you shared. Let us talk about it at your visit.' },
+  { from: 'Crossroads Health', subject: 'Appointment reminder', date: 'Apr 28', unread: true,
+    preview: 'You have an appointment on Apr 30 at 10:15 AM.' },
+  { from: 'Pharmacy', subject: 'Refill ready for pickup', date: 'Apr 12', unread: false,
+    preview: 'Your prescription is ready at the Meridian Street location.' }
+];
+
+function PortalMessages() {
+  return PortalShell('L-messages',
+    PageHead({ title: 'Messages', sub: 'Secure messages with your care team.',
+      actions: Btn({ label: 'New message', size: 'sm' }) }) +
+    PageBody(Card(map(MESSAGES, function (m) {
+      return Row({ a: 'noop' },
+        Tile({ tint: m.unread ? TINT.teal : TINT.gray, mark: m.from[0] }) +
+        '<span class="rowtext"><b style="font-weight:' + (m.unread ? 600 : 500) + '">' + m.subject +
+        (m.unread ? ' ' + Chip('New', 'teal') : '') + '</b>' +
+        '<span>' + m.from + ' · ' + m.preview + '</span></span>' +
+        '<span class="muted-sm" style="flex:none">' + m.date + '</span>');
+    }))));
+}
+
+var RESULTS = [
+  { Test: 'Lipid panel', Date: 'Apr 18, 2026', Result: 'Within range', Status: 'Final' },
+  { Test: 'HbA1c', Date: 'Apr 18, 2026', Result: '5.4%', Status: 'Final' },
+  { Test: 'Complete blood count', Date: 'Jan 22, 2026', Result: 'Within range', Status: 'Final' },
+  { Test: 'Vitamin D', Date: 'Jan 22, 2026', Result: '28 ng/mL · low', Status: 'Final' }
+];
+
+function PortalResults() {
+  return PortalShell('L-results',
+    PageHead({ title: 'Test results', sub: 'Results are released as soon as they are finalized.' }) +
+    PageBody(
+      Callout('Results you see here come from the laboratory system. Data you share from a wearable device appears ' +
+        'under Share my data instead.', 'teal') +
+      Table(['Test', 'Date', 'Result', 'Status'], RESULTS, function (r, c) {
+        return c === 'Status' ? Chip(r[c], 'success') : esc(r[c]);
+      })));
+}
+
+function PortalAppointments() {
+  return PortalShell('L-appointments',
+    PageHead({ title: 'Appointments', sub: 'Upcoming and past visits.', actions: Btn({ label: 'Schedule', size: 'sm' }) }) +
+    PageBody(
+      Panel({ title: 'Upcoming' }, Card(
+        Row({}, Tile({ tint: TINT.teal, mark: '30' }) +
+          RowText(CLINICIAN.name + ' · Primary care', 'Apr 30, 2026 · 10:15 AM · Meridian Street Clinic') +
+          Chip('Confirmed', 'teal')) +
+        Row({}, Tile({ tint: TINT.blue, mark: '14' }) +
+          RowText('Physical therapy · intake', 'May 14, 2026 · 2:00 PM · Rehabilitation Services') +
+          Chip('Needs confirmation', 'warn')))) +
+      Panel({ title: 'Past' }, Card(
+        Row({ muted: true }, Tile({ mark: '22', muted: true }) +
+          RowText(CLINICIAN.name + ' · Annual visit', 'Jan 22, 2026') +
+          Btn({ label: 'Visit summary', size: 'sm', variant: 'secondary' }))))));
+}
+
+/* =====================================================================
+   6. CLINICIAN SCREENS
+   ===================================================================== */
+
+var EHR_NAV = [
+  { id: 'C-summary', label: 'Summary' },
+  { id: 'C-chart', label: 'Chart review' },
+  { id: 'C-vitals', label: 'Vitals' },
+  { id: 'C3', label: 'Notes' },
+  { id: 'C-orders', label: 'Orders' },
+  { id: 'C1', label: 'Remote monitoring' }
+];
+
+function latest(key) {
+  for (var i = SERIES.length - 1; i >= 0; i--) if (SERIES[i][key] !== null) return SERIES[i][key];
+  return null;
+}
+
+function PatientBanner() {
+  return '<div class="banner"><div class="who">' +
+    '<span class="avatar xl" style="' + TINT.teal + '">' + PATIENT.initials + '</span>' +
+    '<div style="min-width:0"><b>' + PATIENT.name + '</b>' +
+    '<p>' + PATIENT.age + ' y · MRN ' + PATIENT.mrn + ' · PCP: ' + PATIENT.pcp + ' · Allergies: none recorded</p>' +
+    '</div></div>' + Chip('Office visit · Today', 'teal') + '</div>';
+}
+
+function EhrShell(active, inner) {
+  return Shell({ brand: 'Crossroads EHR', mark: 'EHR', tint: TINT.blue7, items: EHR_NAV, active: active },
+    PatientBanner() + inner);
+}
+
+function NoConsent() {
+  return '<div style="min-height:0;flex:1;background:var(--g50);padding:40px 32px">' +
+    Empty('No patient-shared data',
+      PATIENT.name + ' has not shared wearable data with this care team. Nothing appears here until the patient ' +
+      'grants consent in the portal. You can request access from the patient’s chart summary.', true) + '</div>';
+}
+
+/* ------------------------------ Consent modal ----------------------------- */
+
+function ConsentModal() {
+  var c = CP().consent;
+  if (!S.clinician.consentModal || !c) return '';
+  var revoked = Object.keys(CP().revoked);
+  var shared = Object.keys(c.metrics).filter(function (k) { return c.metrics[k]; })
+    .map(function (k) { return M[k].label; }).join(', ') || 'None';
+
+  return Modal({ title: 'Consent record', close: 'closeConsent' },
+    '<p class="txt-sm mb5">This is the record the patient agreed to. It is versioned and cannot be edited by staff.</p>' +
+    DefList([
+      { label: 'Metrics shared', value: shared },
+      { label: 'Recipient', value: c.recipient },
+      { label: 'Date range', value: fmtDate(c.start) + ' – ' + fmtDate(c.end) + (c.ongoing ? ' · ongoing' : '') },
+      { label: 'Source', value: c.source + ' (patient device)' },
+      { label: 'Consent version', value: 'v' + c.version },
+      { label: 'Recorded', value: new Date(c.createdAt).toLocaleString() }
+    ]) +
+    (revoked.length ? Callout('Patient revoked: ' + revoked.map(function (k) { return M[k].label; }).join(', ') +
+      '. Revocations take effect immediately and are logged.', 'warn mt5') : ''));
+}
+
+/* ================================== C1 ================================== */
+
+function MetricTile(m) {
+  var c = CP().consent;
+  var gated = m.gated && !skinOK();
+  var revokedAt = CP().revoked[m.id];
+  var live = c && c.metrics[m.id] && !gated;
+
+  if (!live) {
+    return '<div class="metrictile"><div class="top"><span>' + m.clinical + '</span></div>' +
+      '<p class="off">' + (gated ? 'Not available' : 'Not shared') + '</p>' +
+      '<p class="sub">' + (gated ? 'Metric not approved for clinical use'
+        : revokedAt ? 'Patient stopped sharing on ' + new Date(revokedAt).toLocaleDateString()
+        : 'Patient did not include this metric') + '</p></div>';
+  }
+
+  var value = m.id === 'hr' ? RECENT_HR : m.id === 'sleep' ? RECENT_SLEEP : m.id === 'steps' ? STEPS_AFTER : latest(m.key);
+  var sub = m.id === 'hr' ? '30-day avg ' + HR_30D_AVG + ' · normal range'
+    : m.id === 'steps' ? '7-day avg · down ' + STEPS_DROP_PCT + '% since ' + fmtShort(CHANGE_DATE)
+    : m.id === 'sleep' ? 'Nightly avg · steady'
+    : 'Nightly avg · within normal range';
+
+  return '<div class="metrictile live"' + A({ a: 'openTrend', p: m.id }) + '>' +
+    '<div class="top"><span>' + m.clinical + '</span>' +
+    (m.id === 'steps' ? Chip('−' + STEPS_DROP_PCT + '%', 'warn') : '') + '</div>' +
+    '<p class="big">' + m.format(value) + (m.suffix ? '<em>' + m.suffix + '</em>' : '') + '</p>' +
+    '<p class="sub">' + sub + '</p></div>';
+}
+
+function C1Monitoring() {
+  var c = CP().consent;
+  if (!c) return EhrShell('C1', NoConsent());
+  var shared = clinicalShared();
+
+  return EhrShell('C1',
+    '<div class="consentbar"><p>Patient-shared data · Source: ' + c.source +
+    ' · Consent active through ' + fmtDate(c.end) + ' · Last sync 10:12 AM</p>' +
+    '<button' + A({ a: 'openConsent' }) + '>View consent</button></div>' +
+    PageBody(
+      '<div class="grid g4">' + map(METRICS, MetricTile) + '</div>' +
+      '<div class="box"><div class="boxhead"><h3>30-day trends</h3>' +
+      '<span class="hint">Daily averages only · raw minute-level data is never loaded here</span></div>' +
+      (shared.length
+        ? map(shared, function (id) {
+            return '<div class="sparkrow"><span class="lab">' + M[id].clinical + ' (daily)</span>' +
+              '<span class="sp">' + Sparkline(SERIES, M[id].key) + '</span></div>';
+          })
+        : Empty('No metrics are currently shared.')) +
+      '</div>' +
+      ((c.metrics.steps && !S.clinician.flagDismissed)
+        ? '<div class="flagbar"><div style="min-width:0">' +
+          '<b>Change detected: activity down ' + STEPS_DROP_PCT + '% since ' + fmtDate(CHANGE_DATE) + '</b>' +
+          '<p>Rule: 7-day average drops 50% or more against the prior 30 days</p></div>' +
+          '<div class="acts">' + Btn({ label: 'Dismiss', size: 'sm', variant: 'secondary', a: 'dismissFlag' }) +
+          Btn({ label: 'Review trend', size: 'sm', a: 'openTrend', p: 'steps' }) + '</div></div>'
+        : '')
+    ) + ConsentModal());
+}
+
+/* ================================== C2 ================================== */
+
+var RANGES = [{ id: '7d', label: '7d', days: 7 }, { id: '30d', label: '30d', days: 30 }, { id: '60d', label: '60d', days: 999 }];
+
+function C2Trend() {
+  var c = CP().consent;
+  if (!c) return EhrShell('C1', NoConsent());
+  var cl = S.clinician, m = M[cl.focusMetric];
+
+  if (cl.patientView) {
+    return '<div class="patientview"><div class="head"><div>' +
+      '<h2>Your activity</h2><p class="range">' + fmtDate(SERIES[0].date) + ' – ' +
+      fmtDate(SERIES[SERIES.length - 1].date) + '</p></div>' +
+      Btn({ label: 'Exit patient view', variant: 'secondary', a: 'exitPatientView' }) + '</div>' +
+      TrendChart({ data: SERIES, key: 'steps', markerDate: CHANGE_DATE, markerLabel: fmtDate(CHANGE_DATE), height: 340,
+        format: function (v) { return num(v) + ' steps'; } }) +
+      '<div class="compare"><div><p class="lab">Before ' + fmtShort(CHANGE_DATE) + '</p>' +
+      '<p class="val">' + num(STEPS_BEFORE) + ' steps/day</p></div>' +
+      '<span class="arrow">→</span>' +
+      '<div><p class="lab">After</p><p class="val after">' + num(STEPS_AFTER) + ' steps/day</p></div></div></div>';
+  }
+
+  var days = (RANGES.filter(function (r) { return r.id === cl.range; })[0] || { days: 999 }).days;
+  var win = SERIES.slice(Math.max(0, SERIES.length - days));
+
+  return EhrShell('C1', PageBody(
+    '<div class="crumbs"><button class="plainlink"' + A({ a: 'go', p: 'C1' }) + '>‹ Remote monitoring</button>' +
+    '<span class="sep">/ ' + m.clinical + '</span><div class="ranges">' +
+    map(RANGES, function (r) {
+      return '<button class="' + (cl.range === r.id ? 'on' : '') + '"' + A({ a: 'setRange', p: r.id }) + '>' + r.label + '</button>';
+    }) +
+    '<button disabled title="Opens a date picker limited to the consent range">Custom</button></div></div>' +
+
+    '<div class="grid gmain wide gap20"><div class="box">' +
+    '<h3>Daily ' + m.clinical.toLowerCase() + ' · ' + fmtDate(win[0].date) + ' to ' + fmtDate(win[win.length - 1].date) + '</h3>' +
+    TrendChart({ data: win, key: m.key, markerDate: CHANGE_DATE, unit: m.unit,
+      markerLabel: fmtShort(CHANGE_DATE) + ' · −' + STEPS_DROP_PCT + '%',
+      format: function (v) { return (m.format(v) + ' ' + m.suffix).trim(); } }) +
+    (cl.focusMetric === 'steps'
+      ? '<p class="mt3 txt-xs">Average before ' + num(STEPS_BEFORE) + ' steps/day → after ' +
+        num(STEPS_AFTER) + ' steps/day · gaps = no data</p>'
+      : '') +
+    '</div><aside>' +
+    '<div class="box"><h3>About this data</h3>' + DefList([
+      { label: 'Source', value: c.source + ' (patient device)' },
+      { label: 'Units', value: m.unit + ', local time' },
+      { label: 'Coverage', value: COVERAGE_DAYS + ' of ' + TOTAL_DAYS + ' days' },
+      { label: 'Last sync', value: 'Today 10:12 AM' }
+    ], 'narrow') + '</div>' +
+    '<div class="box"><h3>Patient view</h3>' +
+    '<p class="txt-xs mb4">Switch to a simplified, large-text chart to review together on screen.</p>' +
+    Btn({ label: 'Show to patient', full: true, variant: 'secondary', a: 'enterPatientView' }) + '</div>' +
+    '<div class="box"><h3>Add to visit</h3>' +
+    Btn({ label: 'Insert summary into note', full: true, a: 'insertSummary' }) +
+    Btn({ label: 'Go to care plan', full: true, variant: 'secondary', cls: 'mt2', a: 'go', p: 'C3' }) +
+    '<p class="note">Nothing is written to the chart without clinician action.</p></div>' +
+    '</aside></div>'));
+}
+
+/* ================================== C3 ================================== */
+
+var ORDER_ITEMS = ['pt', 'preop', 'continueSharing', 'notify'];
+
+function C3Note() {
+  var c = CP().consent, cl = S.clinician;
+  var summary = c
+    ? 'WEARABLE SUMMARY (patient-shared, ' + c.source + ', ' + fmtDate(c.start) + ' – ' + fmtDate(c.end) + ')\n' +
+      'Activity: 7-day average fell from ' + num(STEPS_BEFORE) + ' to ' + num(STEPS_AFTER) + ' steps/day after ' +
+      fmtDate(CHANGE_DATE) + ' (−' + STEPS_DROP_PCT + '%).\n' +
+      'Resting HR: stable, ' + HR_30D_AVG + ' to ' + RECENT_HR + ' bpm. Sleep: stable, about ' + RECENT_SLEEP + ' hrs/night.\n' +
+      'Data coverage ' + COVERAGE_DAYS + ' of ' + TOTAL_DAYS + ' days.'
+    : '';
+
+  return EhrShell('C3', PageBody(
+    '<div class="grid gmain note gap20"><div class="box">' +
+    '<div class="boxhead"><h3>Visit note · Assessment and plan</h3>' +
+    (cl.noteSigned ? Chip('Signed', 'success') : '') + '</div>' +
+    (cl.noteInserted
+      ? '<div class="mb4"><p class="mb2" style="font-size:12px;font-weight:600;text-transform:uppercase;' +
+        'letter-spacing:.06em;color:var(--e700)">Patient-shared · inserted by ' + CLINICIAN.name + '</p>' +
+        TArea({ value: summary, rows: 6, readonly: true, cls: 'summary', f: 'summary' }) + '</div>'
+      : Empty('No wearable summary inserted',
+          'Open a trend from Remote monitoring and choose “Insert summary into note.”') + '<div class="mb4"></div>') +
+    TArea({ value: cl.noteFreeText, rows: 4, readonly: cl.noteSigned, on: 'setNoteText', f: 'notetext',
+            placeholder: 'Clinician free text' }) +
+    '</div><aside class="box"><h3>Care plan · Orders</h3>' +
+    map(ORDER_ITEMS, function (id) {
+      return '<div class="' + cls('orderbox', cl.noteSigned && 'locked') + '">' +
+        Cbx({ checked: cl.orders[id], disabled: cl.noteSigned, label: ORDER_LABELS[id], a: 'toggleOrder', p: id }) + '</div>';
+    }) +
+    '<p class="note">Checked orders are placed on Sign. The patient sees notified items in the portal.</p>' +
+    '</aside></div>' +
+
+    '<div class="signstrip">' + (cl.noteSigned
+      ? '<p class="signed">✓ Note added to chart · Signed ' +
+        new Date(cl.signedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + '</p>' +
+        Btn({ label: 'Addend note', variant: 'secondary', a: 'unsignNote' })
+      : '<p class="draft">Draft · not visible to the patient</p><div class="acts">' +
+        Btn({ label: 'Save draft', variant: 'secondary' }) +
+        Btn({ label: 'Sign and close', disabled: !c, a: 'signNote' }) + '</div>') + '</div>' +
+
+    (cl.noteSigned && c
+      ? '<p class="audit">Audit: wearable summary inserted by ' + CLINICIAN.name + ' · consent version ' +
+        c.version + ' · data through ' + fmtDate(c.end) + ' 10:12 AM</p>'
+      : '')));
+}
+
+/* ================================== C4 ================================== */
+
+function C4Inbasket() {
+  var c = CP().consent, reviewed = S.clinician.reviewed;
+  var alerts = [];
+  if (c && c.metrics.steps) alerts.push({ id: 'jordan', name: PATIENT.name, initials: 'JM', tint: TINT.teal,
+    detail: 'Activity down ' + STEPS_DROP_PCT + '% since ' + fmtShort(CHANGE_DATE) + ' · visit today' });
+  alerts.push({ id: 'sam', name: 'Sam R.', initials: 'SR', tint: TINT.blue, detail: 'Sleep data gap 5 days · check device' });
+  alerts.push({ id: 'alex', name: 'Alex P.', initials: 'AP', tint: TINT.violet2, detail: 'No change · weekly summary ready' });
+  var unreviewed = alerts.filter(function (a) { return !reviewed[a.id]; }).length;
+
+  return PScreen(
+    AppHeader({ org: 'EHR Mobile' }),
+    ScreenTitle({ step: 'In-basket', title: 'Wearable alerts',
+      body: 'Patients on your panel with a flagged change this week.' }) +
+    '<div class="notif"><div class="meta"><b>EHR Mobile</b><span>7:02 AM</span></div>' +
+    '<p class="title">' + unreviewed + ' patient' + (unreviewed === 1 ? '' : 's') + ' flagged for review</p>' +
+    '<p class="body">Open in-basket to view. No patient details on lock screen.</p></div>' +
+    Card(map(alerts, function (a) {
+      var done = !!reviewed[a.id];
+      return Row({ muted: done }, Tile({ tint: a.tint, mark: a.initials, muted: done }) +
+        RowText(a.name, done ? 'Reviewed' : a.detail, done) +
+        (done ? Chip('Done', 'success') : '<span class="chev">›</span>'));
+    })) +
+    ((c && c.metrics.steps)
+      ? '<div class="box mt4"><p class="mb2 txt-xs">' + PATIENT.name + ' · steps, 30 days</p>' +
+        '<div style="height:60px">' + Sparkline(SERIES.slice(-30), 'steps', 320, 60) + '</div>' +
+        '<p class="mt2 txt-xs">Avg ' + num(STEPS_BEFORE) + ' → ' + num(STEPS_AFTER) + ' steps/day</p></div>'
+      : ''),
+    Btn({ label: 'Mark reviewed', full: true, disabled: !c, a: 'markReviewed' }) +
+    Btn({ label: 'Open chart', full: true, variant: 'secondary', a: 'openChart' })
+  );
+}
+
+/* --------------------------- Clinician chart tabs -------------------------- */
+
+function ChartSummary() {
+  var c = CP().consent, n = clinicalShared().length;
+  return EhrShell('C-summary', PageBody(
+    '<div class="grid g3x">' +
+    Panel({ title: 'Problem list', cls: 'span2' }, Card(
+      Row({}, RowText('Osteoarthritis, left knee', 'Active · onset 2024') + Chip('Active', 'warn')) +
+      Row({}, RowText('Hypertension', 'Active · controlled on lisinopril') + Chip('Controlled', 'success')) +
+      Row({}, RowText('Seasonal allergic rhinitis', 'Intermittent') + Chip('Intermittent')))) +
+    Panel({ title: 'Patient-shared data' }, c
+      ? Chip('Consent active', 'success') + '<p class="mt2 txt-xs">' + n + ' metric' + (n === 1 ? '' : 's') +
+        ' from ' + c.source + '. Activity down ' + STEPS_DROP_PCT + '% since ' + fmtShort(CHANGE_DATE) + '.</p>' +
+        Btn({ label: 'Open remote monitoring', size: 'sm', cls: 'mt3', a: 'go', p: 'C1' })
+      : Chip('No consent on file') +
+        '<p class="mt2 txt-xs">This patient is not sharing wearable data with the care team.</p>') +
+    '</div>' +
+    '<div class="grid g2">' +
+    Panel({ title: 'Medications' }, Card(
+      Row({}, RowText('Lisinopril 10 mg', 'Once daily · last filled Apr 12, 2026')) +
+      Row({}, RowText('Ibuprofen 400 mg', 'As needed for knee pain')))) +
+    Panel({ title: 'Care team' }, DefList([
+      { label: 'Primary care', value: CLINICIAN.name },
+      { label: 'Orthopedics', value: 'Dr. Vance · referred Apr 2026' },
+      { label: 'Care manager', value: 'M. Okafor, RN' }
+    ], 'wide')) +
+    '</div>'));
+}
+
+var ENCOUNTERS = [
+  { Date: 'Apr 30, 2026', Type: 'Office visit', Provider: 'Dr. Benner', Department: 'Primary care', Status: 'In progress' },
+  { Date: 'Jan 22, 2026', Type: 'Annual visit', Provider: 'Dr. Benner', Department: 'Primary care', Status: 'Signed' },
+  { Date: 'Nov 3, 2025', Type: 'Telephone', Provider: 'M. Okafor, RN', Department: 'Care management', Status: 'Signed' },
+  { Date: 'Aug 14, 2025', Type: 'Imaging', Provider: 'Radiology', Department: 'Imaging', Status: 'Signed' }
+];
+
+function ChartReview() {
+  return EhrShell('C-chart', PageBody(
+    Panel({ title: 'Encounters', sub: 'All documented encounters for ' + PATIENT.name + '.' },
+      Table(['Date', 'Type', 'Provider', 'Department', 'Status'], ENCOUNTERS, function (r, c) {
+        return c === 'Status' ? Chip(r[c], r[c] === 'Signed' ? 'success' : 'warn') : esc(r[c]);
+      }))));
+}
+
+var VITALS = [
+  { Date: 'Apr 30, 2026', BP: '124/78', Pulse: '72', Temp: '36.8 °C', Weight: '178 lb', Source: 'In clinic' },
+  { Date: 'Jan 22, 2026', BP: '128/80', Pulse: '70', Temp: '36.7 °C', Weight: '176 lb', Source: 'In clinic' },
+  { Date: 'Nov 3, 2025', BP: '130/82', Pulse: '74', Temp: '—', Weight: '175 lb', Source: 'Patient reported' }
+];
+
+function ChartVitals() {
+  var hrShared = clinicalShared().indexOf('hr') >= 0;
+  return EhrShell('C-vitals', PageBody(
+    (hrShared ? Callout('Resting pulse from the patient’s device flows into this flowsheet as a separate row, ' +
+      'labelled patient-shared, so it is never confused with a clinic measurement. ' +
+      '<button class="tlink" style="font-size:12px;color:inherit"' + A({ a: 'go', p: 'C1' }) + '>View the source</button>', 'teal') : '') +
+    Panel({ title: 'Vitals flowsheet' }, Table(['Date', 'BP', 'Pulse', 'Temp', 'Weight', 'Source'], VITALS))));
+}
+
+function ChartOrders() {
+  var cl = S.clinician;
+  var placed = Object.keys(cl.orders).filter(function (k) { return cl.orders[k]; });
+  return EhrShell('C-orders', PageBody(
+    Panel({ title: 'Orders for this encounter',
+      actions: Btn({ label: 'Open visit note', size: 'sm', variant: 'secondary', a: 'go', p: 'C3' }) },
+      placed.length
+        ? Card(map(placed, function (id) {
+            return Row({}, RowText(ORDER_LABELS[id], cl.noteSigned ? 'Signed · placed today' : 'Pending signature') +
+              Chip(cl.noteSigned ? 'Signed' : 'Draft', cl.noteSigned ? 'success' : 'warn'));
+          }))
+        : '<p class="txt-sm">No orders selected for this encounter yet. Orders are chosen on the visit note.</p>') +
+    Panel({ title: 'Active standing orders' }, Card(
+      Row({}, RowText('Basic metabolic panel', 'Annual · next due Jan 2027') + Chip('Standing')) +
+      Row({}, RowText('Blood pressure check', 'Every 6 months') + Chip('Standing'))))));
+}
+
+/* =====================================================================
+   7. ADMIN — INTEGRATION HUB
+   ===================================================================== */
+
+var HUB_NAV = [
+  { id: 'A-overview', label: 'Overview' },
+  { id: 'A1', label: 'Sources' },
+  { id: 'A-mappings', label: 'Metric mappings' },
+  { id: 'A2', label: 'Review queue' },
+  { id: 'A-log', label: 'Determinations log' },
+  { id: 'A-paused', label: 'Paused projects' }
+];
+var STATUS_TONE = { Live: 'success', Pilot: 'teal', Paused: 'warn', Intake: '' };
+var DECISION_TONE = { Approved: 'success', Declined: 'danger', Deferred: 'warn', Paused: 'warn' };
+
+function HubShell(active, inner) {
+  return Shell({ brand: 'Integration Hub', mark: 'IH', tint: TINT.slate, items: HUB_NAV, active: active }, inner);
+}
+
+/* ================================== A1 ================================== */
+
+function A1Sources() {
+  var sel = HUB_SOURCES.filter(function (s) { return s.id === S.hub.selectedSource; })[0] || HUB_SOURCES[0];
+  var ok = skinOK(), pending = pendingSignoffs();
+  var approvedFor = function (s) { return (s.id === 'whoop' && ok) ? 'HR, steps, sleep, skin temp' : s.approved; };
+  var inReviewFor = function (s) { return (s.id === 'whoop' && ok) ? 'None' : s.inReview; };
+
+  return HubShell('A1',
+    PageHead({ title: 'Wearable sources', sub: 'What patients can connect, and what reaches the chart.',
+      actions: Btn({ label: '+ New source request', size: 'sm', variant: 'secondary' }) }) +
+    PageBody(
+      '<div class="grid g4">' +
+      Stat({ label: 'Live sources', value: '2' }) +
+      Stat({ label: 'Patients sharing', value: '1,248' }) +
+      Stat({ label: 'Sync success (7d)', value: '99.2%', hint: 'Alerts below 97%' }) +
+      Stat({ label: 'Waiting on sign-off', value: pending, attention: pending > 0, hint: 'Open the review queue' }) +
+      '</div>' +
+
+      '<div class="grid gmain gap20">' +
+      '<div class="tablewrap tight"><table><thead><tr>' +
+      map(['Source', 'Status', 'Approved metrics', 'In review', 'Last sync'], function (h) { return '<th>' + h + '</th>'; }) +
+      '</tr></thead><tbody>' +
+      map(HUB_SOURCES, function (s) {
+        var meta = SRC[s.id];
+        return '<tr class="' + cls('click', s.id === sel.id && 'sel') + '"' + A({ a: 'selectSource', p: s.id }) + '>' +
+          '<td><span class="cellflex">' + Tile({ tint: meta.tint, mark: meta.mark, sm: true }) +
+          '<span style="font-weight:500;color:var(--g900)">' + s.name + '</span></span></td>' +
+          '<td>' + Chip(s.status, STATUS_TONE[s.status]) + '</td>' +
+          '<td style="color:var(--g600)">' + approvedFor(s) + '</td>' +
+          '<td style="color:var(--g600)">' + inReviewFor(s) + '</td>' +
+          '<td style="color:var(--g400)">' + s.lastSync + '</td></tr>';
+      }) + '</tbody></table></div>' +
+
+      '<aside><div class="box"><h3>' + sel.name + ' · metric translation</h3>' +
+      (sel.translation.length
+        ? '<dl class="translation">' + map(sel.translation, function (t) {
+            return '<div><dt>' + t.metric + '</dt><dd>' + t.rule + '</dd></div>';
+          }) +
+          ((sel.id === 'whoop' && ok)
+            ? '<div class="approved"><dt>Skin temperature</dt>' +
+              '<dd>°C · nightly avg → Remote monitoring (trend only)</dd></div>'
+            : '') + '</dl>'
+        : Empty('No translation rules yet', 'Source is still in intake.')) + '</div>' +
+
+      '<div class="box"><h3>Sign-off chain</h3><div class="chiprow">' +
+      map(SIGNOFF_TEAMS, function (t) {
+        var done = S.hub.signoffs[t.id] === 'approved';
+        return Chip(t.name + ' ' + (done ? '✓' : '⏳'), done ? 'success' : 'warn');
+      }) + '</div>' +
+      '<p class="note">Shared accountability, visible to every team — not tracked in one person’s file.</p>' +
+      Btn({ label: 'Open review queue', full: true, size: 'sm', variant: 'secondary', cls: 'mt4', a: 'go', p: 'A2' }) +
+      '</div></aside></div>', 'tight'));
+}
+
+/* ================================== A2 ================================== */
+
+function DecisionModal() {
+  var mode = S.ui.decisionModal;
+  if (!mode) return '';
+  var approve = mode === 'approve';
+  return Modal({ title: approve ? 'Approve skin temperature' : 'Decline skin temperature', close: 'closeDecision', md: true },
+    '<p class="txt-sm mb5">Every decision needs a rationale and lands in the determinations log. ' +
+    'Entries cannot be edited, only superseded.</p>' +
+    Field('Rationale (required)', TArea({ value: S.ui.rationale, rows: 3, on: 'setRationale', f: 'rationale',
+      placeholder: 'e.g. Nightly averages only, trend view, no diagnostic use' })) +
+    Field('Revisit date', Input({ value: S.ui.revisit, type: 'date', on: 'setRevisit', f: 'revisit' })),
+    Btn({ label: 'Cancel', variant: 'secondary', a: 'closeDecision' }) +
+    Btn({ label: approve ? 'Approve and release' : 'Decline request', variant: approve ? '' : 'danger',
+          disabled: !S.ui.rationale.trim(), a: 'submitDecision' }));
+}
+
+function A2Review() {
+  var h = S.hub, pending = pendingSignoffs(), resolved = h.skinTempStatus !== 'in_review';
+  var q = S.ui.queryQueue.toLowerCase();
+  var filtered = h.determinations.filter(function (d) {
+    return (d.source + ' ' + d.decision + ' ' + d.rationale + ' ' + d.by).toLowerCase().indexOf(q) >= 0;
+  });
+
+  return HubShell('A2',
+    PageHead({ title: 'Review queue and decisions', sub: 'Who owes a sign-off, and what has already been decided.' }) +
+    PageBody(
+      '<div class="box"><div class="boxhead" style="margin-bottom:8px">' +
+      '<h3>In review: WHOOP · Skin temperature</h3>' +
+      (resolved ? Chip(h.skinTempStatus === 'approved' ? 'Approved' : 'Declined',
+        h.skinTempStatus === 'approved' ? 'success' : 'danger') : '') + '</div>' +
+      '<p class="mb5 txt-xs">Request: allow skin temperature trends on the Remote monitoring tab. ' +
+      'Requested by Clinical informatics, 21 days ago.</p>' +
+
+      '<div class="grid g23 g3x mb5">' + map(SIGNOFF_TEAMS, function (t) {
+        var done = h.signoffs[t.id] === 'approved';
+        return '<div class="' + cls('teamcard', done && 'ok') + '">' +
+          '<div class="top"><b>' + t.name + '</b>' + Chip(done ? 'Approved' : 'Waiting', done ? 'success' : 'warn') + '</div>' +
+          '<p class="owner">' + t.owner + '</p>' +
+          ((!done && !resolved)
+            ? '<div class="acts">' + Btn({ label: 'Record approval', size: 'sm', variant: 'secondary', a: 'recordSignoff', p: t.id }) +
+              Btn({ label: h.nudged[t.id] ? 'Nudged' : 'Nudge', size: 'sm', variant: 'ghost',
+                    disabled: !!h.nudged[t.id], a: 'nudge', p: t.id }) + '</div>'
+            : '') + '</div>';
+      }) + '</div>' +
+
+      '<div class="btnrow">' +
+      Btn({ label: 'Send reminder', variant: 'secondary', disabled: resolved }) +
+      Btn({ label: 'Pause with reason', variant: 'secondary', disabled: resolved }) +
+      Btn({ label: pending > 0 ? 'Approve (' + pending + ' pending)' : 'Approve',
+            disabled: pending > 0 || resolved, a: 'openDecision', p: 'approve',
+            title: pending > 0 ? 'All required teams must approve first' : '' }) +
+      Btn({ label: 'Decline', variant: 'danger', disabled: resolved, a: 'openDecision', p: 'decline' }) +
+      '</div>' +
+      ((pending > 0 && !resolved)
+        ? '<p class="mt3 txt-xs">Approve stays disabled until every required team has signed off. ' +
+          'No single person can release a metric.</p>' : '') +
+      (h.skinTempStatus === 'approved'
+        ? Callout('Released. Skin temperature is now offered to patients in the portal and appears on the ' +
+          'clinician’s Remote monitoring tab.', 'success mt4') : '') +
+      '</div>' +
+
+      '<div class="tablewrap"><div class="searchhead"><h3>Determinations log</h3>' +
+      Input({ value: S.ui.queryQueue, cls: 'sm', on: 'setQueryQueue', f: 'qqueue',
+              placeholder: 'Search source, decision, or team' }) + '</div>' +
+      '<table><thead><tr>' +
+      map(['Date', 'Source · metric', 'Decision', 'Rationale', 'Decided by'], function (c) { return '<th>' + c + '</th>'; }) +
+      '</tr></thead><tbody>' +
+      (filtered.length ? map(filtered, function (d) {
+        return '<tr class="' + (d.isNew ? 'isnew' : '') + '">' +
+          '<td style="color:var(--g400)">' + esc(d.date) + '</td>' +
+          '<td style="color:var(--g900)">' + esc(d.source) + '</td>' +
+          '<td>' + Chip(d.decision, DECISION_TONE[d.decision] || '') + '</td>' +
+          '<td style="color:var(--g600)">' + esc(d.rationale) + '</td>' +
+          '<td style="color:var(--g400)">' + esc(d.by) + '</td></tr>';
+      }) : '<tr><td class="tcenter" colspan="5">No entries match that search.</td></tr>') +
+      '</tbody></table></div>' +
+
+      '<div class="box"><div class="boxhead" style="margin-bottom:8px"><h3>Paused projects · 2</h3>' +
+      Btn({ label: 'View all', size: 'sm', variant: 'secondary', a: 'go', p: 'A-paused' }) + '</div>' +
+      '<p class="txt-xs">Garmin (budget, revisit Q1) · Apple Health HR (identity match, revisit when clinic ' +
+      'rollout ends). Paused work resurfaces on its revisit date instead of being re-explained each intake cycle.</p></div>',
+      'tight') + DecisionModal());
+}
+
+/* ================================== A3 ================================== */
+
+function A3Status() {
+  var waiting = SIGNOFF_TEAMS.filter(function (t) { return S.hub.signoffs[t.id] !== 'approved'; });
+  var ok = skinOK();
+
+  return PScreen(
+    AppHeader({ org: 'Integration Hub' }),
+    ScreenTitle({ step: 'Good morning', title: 'Integration status',
+      body: 'Your daily intake check. ' + waiting.length + ' item' + (waiting.length === 1 ? '' : 's') +
+        ' waiting on other teams.' }) +
+    '<div class="notif"><div class="meta"><b>Integration Hub</b><span>7:45 AM</span></div>' +
+    '<p class="title">' + (ok ? 'WHOOP skin temp released' : 'Security approved WHOOP · skin temp') + '</p>' +
+    '<p class="body">' + (ok ? 'All sign-offs complete. Live for patients.'
+      : waiting.length + ' sign-offs still needed before release.') + '</p></div>' +
+    (waiting.length
+      ? SecLabel('Waiting on others') + Card(map(waiting, function (t) {
+          return Row({}, RowText(t.name, 'Skin temp · 21 days') +
+            Btn({ label: S.hub.nudged[t.id] ? 'Nudged' : 'Nudge', size: 'sm', variant: 'secondary',
+                  disabled: !!S.hub.nudged[t.id], a: 'nudge', p: t.id }));
+        }))
+      : '') +
+    SecLabel('Sync health', 'mt6') +
+    Card(
+      Row({}, Tile({ tint: TINT.slate, mark: 'W' }) +
+        RowText('WHOOP · 99.6%', 'No failed identity matches in 24 hrs') + Chip('Healthy', 'success')) +
+      Row({}, Tile({ tint: TINT.rose, mark: 'A' }) +
+        RowText('Apple Health · 97.1%', 'Pilot · steps only') + Chip('Watch', 'warn'))) +
+    SecLabel('Revisit this quarter', 'mt6') +
+    Card(Row({}, Tile({ tint: TINT.sky, mark: 'G' }) +
+      RowText('Garmin · paused for budget', 'Revisit Jan 15') + Chip('Paused'))),
+    Btn({ label: 'Open full Hub', full: true, a: 'openHub' }) +
+    '<p class="hint">Approvals and translation rules are desktop-only for safety.</p>'
+  );
+}
+
+/* ----------------------------- Hub: other tabs ---------------------------- */
+
+function HubOverview() {
+  var pending = pendingSignoffs();
+  return HubShell('A-overview',
+    PageHead({ title: 'Overview', sub: 'Programme health across every wearable integration.' }) +
+    PageBody(
+      '<div class="grid g4">' +
+      Stat({ label: 'Live sources', value: '2', hint: 'WHOOP, Apple Health' }) +
+      Stat({ label: 'Patients sharing', value: '1,248', hint: '+64 this month' }) +
+      Stat({ label: 'Sync success (7d)', value: '99.2%', hint: 'Alerts below 97%' }) +
+      Stat({ label: 'Waiting on sign-off', value: pending, attention: pending > 0, hint: 'Skin temperature request' }) +
+      '</div>' +
+      '<div class="grid gmain hub gap20">' +
+      Panel({ title: 'Records ingested', sub: 'Daily volume across live sources, last 60 days' },
+        '<div style="height:44px">' + Sparkline(SERIES, 'steps') + '</div>' +
+        '<p class="mt3 txt-xs">Volume tracks patient activity. Dips of more than 3% trigger a sync check.</p>') +
+      Panel({ title: 'Needs your attention',
+        actions: Btn({ label: 'Review queue', size: 'sm', variant: 'secondary', a: 'go', p: 'A2' }) },
+        Card(
+          Row({}, RowText('WHOOP · skin temperature', pending + ' sign-off' + (pending === 1 ? '' : 's') + ' outstanding') +
+            Chip(pending ? 'Waiting' : 'Clear', pending ? 'warn' : 'success')) +
+          Row({}, RowText('Garmin · paused', 'Revisit Jan 15 · budget') + Chip('Paused')) +
+          Row({}, RowText('Fitbit · intake', 'No translation rules yet') + Chip('Intake')))) +
+      '</div>', 'tight'));
+}
+
+function HubMappings() {
+  var rows = [];
+  HUB_SOURCES.forEach(function (s) {
+    s.translation.forEach(function (t) {
+      rows.push({ Source: s.name, Metric: t.metric, 'Translation rule': t.rule, Status: s.status });
+    });
+  });
+  if (skinOK()) rows.push({ Source: 'WHOOP', Metric: 'Skin temperature',
+    'Translation rule': '°C · nightly avg → Remote monitoring (trend only)', Status: 'Live' });
+
+  var q = S.ui.queryMap.toLowerCase();
+  var filtered = rows.filter(function (r) {
+    return (r.Source + ' ' + r.Metric + ' ' + r['Translation rule']).toLowerCase().indexOf(q) >= 0;
+  });
+
+  return HubShell('A-mappings',
+    PageHead({ title: 'Metric mappings', sub: 'How each incoming metric is converted before it reaches a chart.',
+      actions: Input({ value: S.ui.queryMap, cls: 'sm', on: 'setQueryMap', f: 'qmap', placeholder: 'Search metric or rule' }) }) +
+    PageBody(
+      Callout('Every rule states units, aggregation, target location and time zone handling. This is the work vendors ' +
+        'describe as “just an API”.', 'teal') +
+      Table(['Source', 'Metric', 'Translation rule', 'Status'], filtered, function (r, c) {
+        if (c === 'Status') return Chip(r[c], r[c] === 'Live' ? 'success' : r[c] === 'Pilot' ? 'teal' : '');
+        if (c === 'Translation rule') return '<span class="mono">' + esc(r[c]) + '</span>';
+        if (c === 'Source') {
+          var hit = HUB_SOURCES.filter(function (s) { return s.name === r.Source; })[0];
+          var meta = hit && SRC[hit.id];
+          return '<span class="cellflex">' + (meta ? Tile({ tint: meta.tint, mark: meta.mark, sm: true }) : '') + esc(r[c]) + '</span>';
+        }
+        return esc(r[c]);
+      })));
+}
+
+function HubLog() {
+  var q = S.ui.queryLog.toLowerCase();
+  var filtered = S.hub.determinations.filter(function (d) {
+    return (d.source + ' ' + d.decision + ' ' + d.rationale + ' ' + d.by).toLowerCase().indexOf(q) >= 0;
+  }).map(function (d) {
+    return { Date: d.date, 'Source · metric': d.source, Decision: d.decision, Rationale: d.rationale, 'Decided by': d.by };
+  });
+
+  return HubShell('A-log',
+    PageHead({ title: 'Determinations log',
+      sub: 'The shared record of every decision. Entries cannot be edited, only superseded.',
+      actions: Input({ value: S.ui.queryLog, cls: 'sm', on: 'setQueryLog', f: 'qlog',
+        placeholder: 'Search source, decision, or team' }) }) +
+    PageBody(Table(['Date', 'Source · metric', 'Decision', 'Rationale', 'Decided by'], filtered, function (r, c) {
+      return c === 'Decision' ? Chip(r[c], DECISION_TONE[r[c]] || '') : esc(r[c]);
+    })));
+}
+
+function HubPaused() {
+  return HubShell('A-paused',
+    PageHead({ title: 'Paused projects', sub: 'Work that stopped for a reason, with the date it comes back.' }) +
+    PageBody(
+      Callout('Paused items resurface automatically on their revisit date, so nothing has to be re-explained at the ' +
+        'next intake cycle.', 'warn') +
+      Panel({ title: 'Paused · 2' }, Card(
+        Row({}, Tile({ tint: SRC.garmin.tint, mark: SRC.garmin.mark }) +
+          RowText('Garmin · all metrics', 'Paused Feb 9, 2026 by IT leadership · no budget this fiscal year') +
+          '<span class="cellflex" style="flex:none">' + Chip('Revisit Jan 15', 'warn') +
+          Btn({ label: 'Reopen', size: 'sm', variant: 'secondary', a: 'go', p: 'A2' }) + '</span>') +
+        Row({}, Tile({ tint: SRC.apple.tint, mark: SRC.apple.mark }) +
+          RowText('Apple Health · resting heart rate',
+            'Deferred Mar 18, 2026 by Integration · needs clinic-level identity match') +
+          '<span class="cellflex" style="flex:none">' + Chip('Revisit after rollout', 'warn') +
+          Btn({ label: 'Reopen', size: 'sm', variant: 'secondary', a: 'go', p: 'A2' }) + '</span>'))) +
+      Panel({ title: 'Who owes what', sub: 'Across all paused and in-review work' },
+        '<div class="chiprow">' + map(SIGNOFF_TEAMS, function (t) {
+          return Chip(t.name + ' · ' + t.owner);
+        }) + '</div>')));
+}
+
+/* =====================================================================
+   8. ROUTER
+   ===================================================================== */
+
+var SCREENS = {
+  // Patient — phone
+  P1: { fn: P1Connect, dev: 'phone' },
+  P2: { fn: P2Care, dev: 'phone' },
+  P3: { fn: P3Scope, dev: 'phone' },
+  P4: { fn: P4Upload, dev: 'phone' },
+  P5: { fn: P5Done, dev: 'phone' },
+  // Patient — portal
+  L0: { fn: L0Welcome, dev: 'laptop' },
+  L1: { fn: L1Portal, dev: 'laptop' },
+  'L-home': { fn: PortalHome, dev: 'laptop' },
+  'L-messages': { fn: PortalMessages, dev: 'laptop' },
+  'L-results': { fn: PortalResults, dev: 'laptop' },
+  'L-appointments': { fn: PortalAppointments, dev: 'laptop' },
+  // Clinician — chart
+  C1: { fn: C1Monitoring, dev: 'laptop' },
+  C2: { fn: C2Trend, dev: 'laptop' },
+  C3: { fn: C3Note, dev: 'laptop' },
+  C4: { fn: C4Inbasket, dev: 'phone' },
+  'C-summary': { fn: ChartSummary, dev: 'laptop' },
+  'C-chart': { fn: ChartReview, dev: 'laptop' },
+  'C-vitals': { fn: ChartVitals, dev: 'laptop' },
+  'C-orders': { fn: ChartOrders, dev: 'laptop' },
+  // Admin — integration hub
+  A1: { fn: A1Sources, dev: 'laptop' },
+  A2: { fn: A2Review, dev: 'laptop' },
+  A3: { fn: A3Status, dev: 'phone' },
+  'A-overview': { fn: HubOverview, dev: 'laptop' },
+  'A-mappings': { fn: HubMappings, dev: 'laptop' },
+  'A-log': { fn: HubLog, dev: 'laptop' },
+  'A-paused': { fn: HubPaused, dev: 'laptop' }
+};
+
+function view() {
+  var d = device(), id = screenId();
+  // Fall back to the profile's start screen if the current id is not valid for
+  // this device (for example after switching from phone to laptop).
+  if (!SCREENS[id] || SCREENS[id].dev !== d) id = START[S.profile][d];
+  var body = SCREENS[id].fn();
+  return d === 'phone' ? PhoneFrame(body) : '<div style="height:100vh;overflow:hidden">' + body + '</div>';
+}
+
+/* =====================================================================
+   ACTIONS — every data-a value maps to one of these.
+   ===================================================================== */
+
+function findUpload(owner, id) {
+  return owner.uploads.filter(function (u) { return u.id === id; })[0];
+}
+
+var ACCEPTED = ['csv', 'xml', 'json'];
+
+// Stand-in for the server-side format check and unit conversion.
+function addFiles(list) {
+  Array.prototype.slice.call(list, 0, 4).forEach(function (file) {
+    var owner = P();
+    var ext = (file.name.split('.').pop() || '').toLowerCase();
+    var ok = ACCEPTED.indexOf(ext) >= 0;
+    var id = Math.random().toString(36).slice(2);
+
+    owner.uploads.push({
+      id: id, name: file.name, status: ok ? 'checking' : 'rejected', progress: 0,
+      detail: ok ? '' : ext.toUpperCase() + ' files are not accepted. Use CSV, XML or JSON.'
+    });
+    if (!ok) return;
+
+    var pct = 0;
+    var tick = setInterval(function () {
+      var u = findUpload(owner, id);
+      if (!u) { clearInterval(tick); return; }
+      pct += 18 + Math.random() * 22;
+      if (pct >= 100) {
+        clearInterval(tick);
+        var bad = /sleep/i.test(file.name);
+        u.status = bad ? 'error' : 'ready';
+        u.progress = 100;
+        u.detail = bad ? '' : '31 days found';
+      } else {
+        u.progress = Math.min(99, Math.round(pct));
+      }
+      render();
+    }, 420);
+  });
+  render();
+}
+
+var ACT = {
+  noop: function () {},
+
+  /* ---- navigation ---- */
+  go: function (id) { S.screens[S.profile][device()] = id; S.ui.menu = null; },
+  setDevice: function (d) { S.devices[S.profile] = d; S.ui.menu = null; },
+  setProfile: function (id) { S.profile = id; S.ui.menu = null; },
+  menu: function (which) { S.ui.menu = S.ui.menu === which ? null : which; },
+  resetAll: function () { S = initial(); },
+
+  /* ---- patient ---- */
+  toggleSource: function (id) { var p = P(); p.connected[id] = !p.connected[id]; },
+  setSystem: function (id) { P().healthSystem = id; },
+  setPlan: function (id) { P().plan = id; },
+  toggleAgreed: function () { P().agreed = !P().agreed; },
+  toggleOngoing: function () { P().ongoing = !P().ongoing; },
+  openDate: function () { S.ui.dateModal = true; },
+  closeDate: function () { S.ui.dateModal = false; },
+  setStart: function (v) { P().start = v; },
+  setEnd: function (v) { P().end = v; },
+  setStep: function (n) { P().portalStep = Number(n); },
+  uploadMode: function (m) { S.ui.uploadMode = m; },
+  removeUpload: function (id) {
+    var p = P();
+    p.uploads = p.uploads.filter(function (u) { return u.id !== id; });
+  },
+
+  // Switching a metric off stops it immediately and is recorded on the consent.
+  toggleMetric: function (id) {
+    var p = P(), on = !p.metrics[id];
+    if (!on && p.consent) p.revoked[id] = new Date().toISOString();
+    if (on) delete p.revoked[id];
+    p.metrics[id] = on;
+    if (p.consent) {
+      p.consent.metrics = Object.assign({}, p.metrics);
+      p.consent.version += 1;
+    }
+  },
+
+  share: function (next) {
+    var owner = P();
+    owner.sharing = true;
+    setTimeout(function () {
+      owner.sharing = false;
+      owner.consent = {
+        metrics: Object.assign({}, owner.metrics),
+        recipient: RECIPIENT,
+        start: owner.start, end: owner.end, ongoing: owner.ongoing,
+        version: ((owner.consent && owner.consent.version) || 2) + 1,
+        createdAt: new Date().toISOString(),
+        source: 'WHOOP'
+      };
+      if (next) ACT.go(next);
+      render();
+    }, 900);
+  },
+
+  // Device and care team stay linked, so resuming returns to the scope step.
+  stopSharing: function () {
+    var p = P();
+    p.consent = null; p.agreed = false; p.portalStep = 2;
+  },
+
+  /* ---- clinician ---- */
+  openTrend: function (id) { S.clinician.focusMetric = id; ACT.go('C2'); },
+  dismissFlag: function () { S.clinician.flagDismissed = true; },
+  openConsent: function () { S.clinician.consentModal = true; },
+  closeConsent: function () { S.clinician.consentModal = false; },
+  setRange: function (r) { S.clinician.range = r; },
+  enterPatientView: function () { S.clinician.patientView = true; },
+  exitPatientView: function () { S.clinician.patientView = false; },
+  insertSummary: function () { S.clinician.noteInserted = true; ACT.go('C3'); },
+  setNoteText: function (v) { S.clinician.noteFreeText = v; },
+  toggleOrder: function (id) { S.clinician.orders[id] = !S.clinician.orders[id]; },
+  signNote: function () { S.clinician.noteSigned = true; S.clinician.signedAt = new Date().toISOString(); },
+  unsignNote: function () { S.clinician.noteSigned = false; S.clinician.signedAt = null; },
+  markReviewed: function () { S.clinician.reviewed.jordan = true; },
+  openChart: function () { S.devices[S.profile] = 'laptop'; ACT.go('C1'); },
+
+  /* ---- admin hub ---- */
+  selectSource: function (id) { S.hub.selectedSource = id; },
+  recordSignoff: function (id) { S.hub.signoffs[id] = 'approved'; },
+  nudge: function (id) { S.hub.nudged[id] = true; },
+  openDecision: function (mode) { S.ui.decisionModal = mode; S.ui.rationale = ''; },
+  closeDecision: function () { S.ui.decisionModal = null; S.ui.rationale = ''; },
+  setRationale: function (v) { S.ui.rationale = v; },
+  setRevisit: function (v) { S.ui.revisit = v; },
+  setQueryQueue: function (v) { S.ui.queryQueue = v; },
+  setQueryLog: function (v) { S.ui.queryLog = v; },
+  setQueryMap: function (v) { S.ui.queryMap = v; },
+  openHub: function () { S.devices[S.profile] = 'laptop'; ACT.go('A2'); },
+
+  submitDecision: function () {
+    var approve = S.ui.decisionModal === 'approve';
+    S.hub.skinTempStatus = approve ? 'approved' : 'declined';
+    S.hub.determinations.unshift({
+      date: 'Today', source: 'WHOOP · Skin temperature',
+      decision: approve ? 'Approved' : 'Declined',
+      rationale: S.ui.rationale.trim(), by: 'Integration', isNew: true
+    });
+    S.ui.decisionModal = null;
+    S.ui.rationale = '';
+  }
+};
+
+/* =====================================================================
+   EVENTS — one delegated listener per kind, so nothing is re-bound.
+   ===================================================================== */
+
+root.addEventListener('click', function (e) {
+  // Clicking away from an open profile menu closes it.
+  if (S.ui.menu && !e.target.closest('[data-menu]')) { S.ui.menu = null; render(); }
+
+  var drop = e.target.closest('[data-drop]');
+  if (drop) { drop.querySelector('[data-fileinput]').click(); return; }
+
+  var el = e.target.closest('[data-a]');
+  if (!el) return;
+  // A backdrop only closes when the backdrop itself is clicked, not the dialog.
+  if (el.classList.contains('backdrop') && e.target.closest('[data-stop]')) return;
+
+  var fn = ACT[el.dataset.a];
+  if (!fn) return;
+  fn(el.dataset.p, el.dataset.q);
+  render();
+});
+
+root.addEventListener('input', function (e) {
+  var el = e.target.closest('[data-in]');
+  if (!el) return;
+  var fn = ACT[el.dataset.in];
+  if (!fn) return;
+  fn(el.value, el.dataset.p);
+  render();
+});
+
+root.addEventListener('change', function (e) {
+  var input = e.target.closest('[data-fileinput]');
+  if (input && input.files && input.files.length) { addFiles(input.files); input.value = ''; }
+});
+
+['dragover', 'dragenter'].forEach(function (evt) {
+  root.addEventListener(evt, function (e) {
+    if (!e.target.closest('[data-drop]')) return;
+    e.preventDefault();
+    if (!S.ui.dragging) { S.ui.dragging = true; render(); }
+  });
+});
+root.addEventListener('dragleave', function (e) {
+  if (!e.target.closest('[data-drop]')) return;
+  if (S.ui.dragging) { S.ui.dragging = false; render(); }
+});
+root.addEventListener('drop', function (e) {
+  var drop = e.target.closest('[data-drop]');
+  if (!drop) return;
+  e.preventDefault();
+  S.ui.dragging = false;
+  if (e.dataTransfer && e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+  else render();
+});
+
+window.addEventListener('keydown', function (e) {
+  if (e.key !== 'Escape') return;
+  if (S.ui.menu) { S.ui.menu = null; render(); return; }
+  if (S.ui.dateModal) { S.ui.dateModal = false; render(); return; }
+  if (S.ui.decisionModal) { ACT.closeDecision(); render(); return; }
+  if (S.clinician.consentModal) { S.clinician.consentModal = false; render(); }
+});
+
+/* ------------------------------ Chart hover ------------------------------ */
+
+function clearHovers() {
+  Array.prototype.forEach.call(root.querySelectorAll('[data-chart]'), function (w) {
+    var g = w.querySelector('.hoverg'), tip = w.querySelector('.tip');
+    if (g) g.innerHTML = '';
+    if (tip) tip.style.display = 'none';
+  });
+}
+
+root.addEventListener('mousemove', function (e) {
+  var wrap = e.target.closest ? e.target.closest('[data-chart]') : null;
+  if (!wrap) { clearHovers(); return; }
+  var c = charts[wrap.getAttribute('data-chart')];
+  if (!c) return;
+
+  var svg = wrap.querySelector('svg');
+  var rect = svg.getBoundingClientRect();
+  var px = ((e.clientX - rect.left) / rect.width) * c.width;
+
+  var best = null;
+  c.points.forEach(function (p) {
+    if (p.v === null) return;
+    var d = Math.abs(p.x - px);
+    if (!best || d < best.d) best = { d: d, p: p };
+  });
+
+  var g = wrap.querySelector('.hoverg'), tip = wrap.querySelector('.tip');
+  if (best && best.d < 24) {
+    var p = best.p;
+    g.innerHTML = '<line x1="' + p.x + '" x2="' + p.x + '" y1="' + c.top + '" y2="' + c.bottom +
+      '" stroke="rgb(156 163 175)" stroke-width="1"/>' +
+      '<circle cx="' + p.x + '" cy="' + p.y + '" r="5" fill="rgb(15 118 110)" stroke="white" stroke-width="2.5"/>';
+    tip.style.display = 'flex';
+    tip.style.left = ((p.x / c.width) * 100) + '%';
+    tip.querySelector('b').textContent = c.format ? c.format(p.v) : p.v;
+    tip.querySelector('span').textContent = fmtShort(p.date);
+  } else {
+    g.innerHTML = '';
+    tip.style.display = 'none';
+  }
+});
+
+root.addEventListener('mouseleave', clearHovers, true);
+
+/* -------------------------------- Boot ---------------------------------- */
+render();
+
+})();
+</script>
+</body>
+</html>
